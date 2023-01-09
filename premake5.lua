@@ -21,7 +21,16 @@ project "Escape"
 
     includedirs
     {
-        "%{prj.name}/Source"
+        "%{prj.name}/Source",
+        
+        "%{wks.location}/Libraries/GLFW/include",
+        "%{wks.location}/Libraries/Glad/include"
+    }
+
+    links
+    {
+        "GLFW",
+        "Glad"
     }
 
     filter "system:windows"
@@ -46,3 +55,8 @@ project "Escape"
         runtime "Release"
         optimize "On"
         symbols "Off"
+
+group "Libraries"
+    include "Libraries/GLFW"
+    include "Libraries/Glad"
+group ""
