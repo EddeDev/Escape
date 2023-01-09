@@ -11,6 +11,10 @@ namespace Escape {
 		windowCreateInfo.Title = "Escape";
 
 		m_Window = Ref<Window>::Create(windowCreateInfo);
+		m_Window->AddCloseCallback([this]()
+		{
+			m_Running = false;
+		});
 	}
 
 	EscapeGame::~EscapeGame()
