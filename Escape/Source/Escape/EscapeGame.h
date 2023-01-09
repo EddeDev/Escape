@@ -6,6 +6,7 @@
 #include "GraphicsPipeline.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "UniformBuffer.h"
 
 namespace Escape {
 
@@ -22,6 +23,7 @@ namespace Escape {
 		Ref<GraphicsPipeline> m_Pipeline;
 		Ref<VertexBuffer> m_VertexBuffer;
 		Ref<IndexBuffer> m_IndexBuffer;
+		Ref<UniformBuffer> m_UniformBuffer;
 		bool m_Running = true;
 	};
 
