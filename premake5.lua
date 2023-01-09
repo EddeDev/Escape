@@ -10,17 +10,18 @@ workspace "Escape"
 project "Escape"
     language "C++"
     cppdialect "C++latest"
+    location "%{prj.name}"
     staticruntime "Off"
 
     files
     {
-        "Source/**.cpp",
-        "Source/**.h"
+        "%{prj.name}/Source/**.cpp",
+        "%{prj.name}/Source/**.h"
     }
 
     includedirs
     {
-        "Source"
+        "%{prj.name}/Source"
     }
 
     filter "system:windows"
