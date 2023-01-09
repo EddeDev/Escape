@@ -55,13 +55,18 @@ namespace Escape {
 		for (auto& attribute : inputLayout)
 		{
 			glEnableVertexAttribArray(attribute.Index);
-			glVertexAttribPointer(attribute.Index, attribute.ComponentCount, Utils::OpenGLShaderDataType(attribute.Type), GL_FALSE, inputLayout.Stride, (const void*)(uintptr_t)attribute.Offset);
+
+			uint32 type = Utils::OpenGLShaderDataType(attribute.Type);
+			if (type == GL_INT)
+				glVertexAttribIPointer(attribute.Index, attribute.ComponentCount, type, inputLayout.Stride, (const void*)(uintptr_t)attribute.Offset);
+			else
+				glVertexAttribPointer(attribute.Index, attribute.ComponentCount, type, GL_FALSE, inputLayout.Stride, (const void*)(uintptr_t)attribute.Offset);
 		}
 	}
 
 	void GraphicsPipeline::DrawIndexed(uint32 indexCount) const
 	{
-		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(Utils::OpenGLPrimitiveTopology(m_CreateInfo.Topology), indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 
 }
