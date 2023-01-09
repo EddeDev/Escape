@@ -1,0 +1,20 @@
+# Binaries
+Build/
+**/Bin/
+Obj/
+
+# Log files
+**.log
+
+# Visual Studio
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+**.user
+/JSON
+
+# LFS folders
+lfs/
+hooks/
