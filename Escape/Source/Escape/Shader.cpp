@@ -1,31 +1,13 @@
 #include "EscapePCH.h"
 #include "Shader.h"
 
+#include "FileUtils.h"
+
 #include <glad/glad.h>
 
 namespace Escape {
 	
 	namespace Utils {
-
-		static std::string ReadFile(const std::string& filepath)
-		{
-			std::string result;
-			std::ifstream in(filepath, std::ios::in | std::ios::binary);
-			if (in)
-			{
-				in.seekg(0, std::ios::end);
-				std::streampos size = in.tellg();
-				in.seekg(0, std::ios::beg);
-				result.resize(size);
-				in.read(result.data(), size);
-			}
-			else
-			{
-				std::cerr << "Could not open file '" << filepath << "'!" << std::endl;
-			}
-			in.close();
-			return result;
-		}
 
 		static uint32 OpenGLShaderStage(ShaderStage stage)
 		{
@@ -105,8 +87,8 @@ namespace Escape {
 	Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 	{
 		std::unordered_map<ShaderStage, std::string> sources;
-		sources[ShaderStage::Vertex] = Utils::ReadFile(vertexShaderPath);
-		sources[ShaderStage::Fragment] = Utils::ReadFile(fragmentShaderPath);
+		sources[ShaderStage::Vertex] = FileUtils::ReadFile(vertexShaderPath);
+		sources[ShaderStage::Fragment] = FileUtils::ReadFile(fragmentShaderPath);
 
 		Compile(sources);
 		Reflect();
@@ -197,12 +179,12 @@ namespace Escape {
 			std::vector<char> name(maxLength);
 
 			uint32 offset = 0;
-			for (uint32 i = 0; i < count; i++)
+			for (int32 i = 0; i < count; i++)
 			{
 				int32 length;
 				int32 size;
 				uint32 type;
-				glGetActiveAttrib(m_ProgramID, i, maxLength, &length, &size, &type, name.data());
+				glGetActiveAttrib(m_ProgramID, (uint32)i, maxLength, &length, &size, &type, name.data());
 
 				ShaderAttribute& attribute = m_InputLayout.Attributes.emplace_back();
 				attribute.Name = name.data();
