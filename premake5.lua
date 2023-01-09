@@ -13,6 +13,9 @@ project "Escape"
     location "%{prj.name}"
     staticruntime "Off"
 
+    pchheader "EscapePCH.h"
+    pchsource "%{prj.name}/Source/EscapePCH.cpp"
+
     files
     {
         "%{prj.name}/Source/**.cpp",
