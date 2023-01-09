@@ -8,6 +8,10 @@
 #include "IndexBuffer.h"
 #include "UniformBuffer.h"
 
+#include "Renderer.h"
+
+#include "Camera.h"
+
 namespace Escape {
 
 	class EscapeGame
@@ -18,13 +22,14 @@ namespace Escape {
 
 		void Run();
 	private:
+		void OnWindowClose();
+		void OnWindowResize(int32 width, int32 height);
+	private:
 		Ref<Window> m_Window;
-		Ref<Shader> m_Shader;
-		Ref<GraphicsPipeline> m_Pipeline;
-		Ref<VertexBuffer> m_VertexBuffer;
-		Ref<IndexBuffer> m_IndexBuffer;
-		Ref<UniformBuffer> m_UniformBuffer;
+		Ref<Renderer> m_Renderer;
 		bool m_Running = true;
+
+		Camera m_Camera;
 	};
 
 }

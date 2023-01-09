@@ -16,5 +16,4 @@
 #include <unordered_set>
 #include <filesystem>
 
-#include "Escape/PrimitiveTypes.h"
-#include "Escape/RefCounting.h"
+#include "Escape/Core.h"
