@@ -49,6 +49,57 @@ namespace Escape {
 			return "";
 		}
 
+		static uint32 ShaderDataTypeSize(ShaderDataType type)
+		{
+			switch (type)
+			{
+			case ShaderDataType::Float:  return sizeof(float) * 1;
+			case ShaderDataType::Float2: return sizeof(float) * 2;
+			case ShaderDataType::Float3: return sizeof(float) * 3;
+			case ShaderDataType::Float4: return sizeof(float) * 4;
+			case ShaderDataType::Int:    return sizeof(int32) * 1;
+			case ShaderDataType::Int2:   return sizeof(int32) * 2;
+			case ShaderDataType::Int3:   return sizeof(int32) * 3;
+			case ShaderDataType::Int4:   return sizeof(int32) * 4;
+			}
+			std::cerr << "Unknown shader data type!" << std::endl;
+			return 0;
+		}
+
+		static uint32 ShaderDataTypeComponentCount(ShaderDataType type)
+		{
+			switch (type)
+			{
+			case ShaderDataType::Float:  return 1;
+			case ShaderDataType::Float2: return 2;
+			case ShaderDataType::Float3: return 3;
+			case ShaderDataType::Float4: return 4;
+			case ShaderDataType::Int:    return 1;
+			case ShaderDataType::Int2:   return 2;
+			case ShaderDataType::Int3:   return 3;
+			case ShaderDataType::Int4:   return 4;
+			}
+			std::cerr << "Unknown shader data type!" << std::endl;
+			return 0;
+		}
+
+		static ShaderDataType ShaderDataTypeFromOpenGLType(uint32 type)
+		{
+			switch (type)
+			{
+			case GL_FLOAT:      return ShaderDataType::Float;
+			case GL_FLOAT_VEC2: return ShaderDataType::Float2;
+			case GL_FLOAT_VEC3: return ShaderDataType::Float3;
+			case GL_FLOAT_VEC4: return ShaderDataType::Float4;
+			case GL_INT:        return ShaderDataType::Int;
+			case GL_INT_VEC2:   return ShaderDataType::Int2;
+			case GL_INT_VEC3:   return ShaderDataType::Int3;
+			case GL_INT_VEC4:   return ShaderDataType::Int4;
+			}
+			std::cerr << "Unknown shader data type!" << std::endl;
+			return ShaderDataType::None;
+		}
+
 	}
 
 	Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
@@ -58,11 +109,22 @@ namespace Escape {
 		sources[ShaderStage::Fragment] = Utils::ReadFile(fragmentShaderPath);
 
 		Compile(sources);
+		Reflect();
 	}
 
 	Shader::~Shader()
 	{
 		glDeleteProgram(m_ProgramID);
+	}
+
+	void Shader::Bind() const
+	{
+		glUseProgram(m_ProgramID);
+	}
+
+	void Shader::Unbind() const
+	{
+		glUseProgram(0);
 	}
 
 	void Shader::Compile(const std::unordered_map<ShaderStage, std::string>& sources)
@@ -120,6 +182,41 @@ namespace Escape {
 
 		for (auto& [stage, shaderID] : shaderIDs)
 			glDetachShader(m_ProgramID, shaderID);
+	}
+
+	void Shader::Reflect()
+	{
+		// Attributes
+		{
+			int32 count = 0;
+			glGetProgramiv(m_ProgramID, GL_ACTIVE_ATTRIBUTES, &count);
+
+			int32 maxLength = 0;
+			glGetProgramInterfaceiv(m_ProgramID, GL_PROGRAM_INPUT, GL_MAX_NAME_LENGTH, &maxLength);
+
+			std::vector<char> name(maxLength);
+
+			uint32 offset = 0;
+			for (uint32 i = 0; i < count; i++)
+			{
+				int32 length;
+				int32 size;
+				uint32 type;
+				glGetActiveAttrib(m_ProgramID, i, maxLength, &length, &size, &type, name.data());
+
+				ShaderAttribute& attribute = m_InputLayout.Attributes.emplace_back();
+				attribute.Name = name.data();
+				attribute.Index = i;
+				attribute.Offset = offset;
+				attribute.Type = Utils::ShaderDataTypeFromOpenGLType(type);
+				attribute.Size = Utils::ShaderDataTypeSize(attribute.Type);
+				attribute.ComponentCount = Utils::ShaderDataTypeComponentCount(attribute.Type);
+
+				offset += attribute.Size;
+			}
+
+			m_InputLayout.Stride = offset;
+		}
 	}
 
 }

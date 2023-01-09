@@ -30,6 +30,12 @@ namespace Escape {
 			// Assert
 		}
 
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+
+#ifdef ESCAPE_BUILD_DEBUG
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
+
 		m_WindowHandle = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		if (!m_WindowHandle)
 		{
@@ -46,6 +52,21 @@ namespace Escape {
 
 		glfwMakeContextCurrent(m_WindowHandle);
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+#ifdef ESCAPE_BUILD_DEBUG
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback([](uint32 source, uint32 type, uint32 id, uint32 severity, int32 length, const char* message, const void* userParam)
+		{
+			if (id == 131185)
+				return;
+
+			std::cerr << "[OpenGL] " << message << " (" << id << ")" << std::endl;
+
+			__debugbreak();
+		}, this);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+#endif
 
 		glfwShowWindow(m_WindowHandle);
 	}

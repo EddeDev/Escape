@@ -19,15 +19,19 @@ project "Escape"
     files
     {
         "%{prj.name}/Source/**.cpp",
-        "%{prj.name}/Source/**.h"
+        "%{prj.name}/Source/**.h",
+
+        "%{prj.name}/Libraries/glm/glm/**.hpp",
+        "%{prj.name}/Libraries/glm/glm/**.inl"
     }
 
     includedirs
     {
         "%{prj.name}/Source",
         
-        "%{wks.location}/Libraries/GLFW/include",
-        "%{wks.location}/Libraries/Glad/include"
+        "%{prj.name}/Libraries/GLFW/include",
+        "%{prj.name}/Libraries/Glad/include",
+        "%{prj.name}/Libraries/glm"
     }
 
     links
@@ -60,6 +64,6 @@ project "Escape"
         symbols "Off"
 
 group "Libraries"
-    include "Libraries/GLFW"
-    include "Libraries/Glad"
+    include "Escape/Libraries/GLFW"
+    include "Escape/Libraries/Glad"
 group ""
