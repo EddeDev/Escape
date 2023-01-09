@@ -1,7 +1,10 @@
 #include "EscapePCH.h"
 #include "EscapeGame.h"
 
+#include "Renderer.h"
+
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Escape {
 
@@ -16,6 +19,10 @@ namespace Escape {
 		m_Window->AddCloseCallback([this]()
 		{
 			m_Running = false;
+		});
+		m_Window->AddResizeCallback([](auto width, auto height)
+		{
+			Renderer::SetViewport(0, 0, width, height);
 		});
 	}
 
@@ -58,6 +65,8 @@ namespace Escape {
 		m_VertexBuffer = Ref<VertexBuffer>::Create(quadVertices, sizeof(QuadVertex) * 4);
 		m_IndexBuffer = Ref<IndexBuffer>::Create(quadIndices, sizeof(QuadIndex) * 2);
 
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), { 0.5f, 0.0f, 0.0f });
+
 		while (m_Running)
 		{
 			m_Window->PollEvents();
@@ -67,6 +76,8 @@ namespace Escape {
 			m_IndexBuffer->Bind();
 
 			m_Shader->Bind();
+			m_Shader->SetUniform("u_Constants.Transform", transform);
+
 			m_Pipeline->DrawIndexed(m_IndexBuffer->GetCount());
 
 			m_Window->SwapBuffers();

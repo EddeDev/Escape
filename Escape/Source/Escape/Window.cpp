@@ -26,8 +26,11 @@ namespace Escape {
 
 		if (s_GLFWWindowCount == 0)
 		{
-			int32 success = glfwInit();
-			// Assert
+			if (!glfwInit())
+			{
+				std::cout << "Unable to initialize GLFW!" << std::endl;
+				return;
+			}
 		}
 
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
@@ -39,7 +42,7 @@ namespace Escape {
 		m_WindowHandle = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		if (!m_WindowHandle)
 		{
-			// Assert
+			std::cout << "Failed to create GLFW window!" << std::endl;
 			return;
 		}
 
@@ -60,9 +63,7 @@ namespace Escape {
 		{
 			if (id == 131185)
 				return;
-
 			std::cerr << "[OpenGL] " << message << " (" << id << ")" << std::endl;
-
 			__debugbreak();
 		}, this);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);

@@ -43,6 +43,8 @@ namespace Escape {
 			case ShaderDataType::Int2:   return sizeof(int32) * 2;
 			case ShaderDataType::Int3:   return sizeof(int32) * 3;
 			case ShaderDataType::Int4:   return sizeof(int32) * 4;
+			case ShaderDataType::Mat3:   return sizeof(float) * 3 * 3;
+			case ShaderDataType::Mat4:   return sizeof(float) * 4 * 4;
 			}
 			std::cerr << "Unknown shader data type!" << std::endl;
 			return 0;
@@ -60,6 +62,8 @@ namespace Escape {
 			case ShaderDataType::Int2:   return 2;
 			case ShaderDataType::Int3:   return 3;
 			case ShaderDataType::Int4:   return 4;
+			case ShaderDataType::Mat3:   return 3 * 3;
+			case ShaderDataType::Mat4:   return 4 * 4;
 			}
 			std::cerr << "Unknown shader data type!" << std::endl;
 			return 0;
@@ -77,6 +81,8 @@ namespace Escape {
 			case GL_INT_VEC2:   return ShaderDataType::Int2;
 			case GL_INT_VEC3:   return ShaderDataType::Int3;
 			case GL_INT_VEC4:   return ShaderDataType::Int4;
+			case GL_FLOAT_MAT3: return ShaderDataType::Mat3;
+			case GL_FLOAT_MAT4: return ShaderDataType::Mat4;
 			}
 			std::cerr << "Unknown shader data type!" << std::endl;
 			return ShaderDataType::None;
@@ -107,6 +113,63 @@ namespace Escape {
 	void Shader::Unbind() const
 	{
 		glUseProgram(0);
+	}
+
+	void Shader::SetUniform(const ShaderUniform& uniform, const void* data)
+	{
+		switch (uniform.Type)
+		{
+		case ShaderDataType::Float:
+		{
+			glProgramUniform1fv(m_ProgramID, uniform.Location, 1, (const float*)data);
+			break;
+		}
+		case ShaderDataType::Float2:
+		{
+			glProgramUniform2fv(m_ProgramID, uniform.Location, 1, (const float*)data);
+			break;
+		}
+		case ShaderDataType::Float3:
+		{
+			glProgramUniform3fv(m_ProgramID, uniform.Location, 1, (const float*)data);
+			break;
+		}
+		case ShaderDataType::Float4:
+		{
+			glProgramUniform4fv(m_ProgramID, uniform.Location, 1, (const float*)data);
+			break;
+		}
+		case ShaderDataType::Int:
+		{
+			glProgramUniform1iv(m_ProgramID, uniform.Location, 1, (const int32*)data);
+			break;
+		}
+		case ShaderDataType::Int2:
+		{
+			glProgramUniform2iv(m_ProgramID, uniform.Location, 1, (const int32*)data);
+			break;
+		}
+		case ShaderDataType::Int3:
+		{
+			glProgramUniform3iv(m_ProgramID, uniform.Location, 1, (const int32*)data);
+			break;
+		}
+		case ShaderDataType::Int4:
+		{
+			glProgramUniform4iv(m_ProgramID, uniform.Location, 1, (const int32*)data);
+			break;
+		}
+		case ShaderDataType::Mat3:
+		{
+			glProgramUniformMatrix3fv(m_ProgramID, uniform.Location, 1, GL_FALSE, (const float*)data);
+			break;
+		}
+		case ShaderDataType::Mat4:
+		{
+			glProgramUniformMatrix4fv(m_ProgramID, uniform.Location, 1, GL_FALSE, (const float*)data);
+			break;
+		}
+		}
 	}
 
 	void Shader::Compile(const std::unordered_map<ShaderStage, std::string>& sources)
@@ -199,6 +262,33 @@ namespace Escape {
 
 			m_InputLayout.Stride = offset;
 		}
+
+		// Uniforms
+		{
+			int32 count = 0;
+			glGetProgramiv(m_ProgramID, GL_ACTIVE_UNIFORMS, &count);
+
+			int32 maxLength = 0;
+			glGetProgramInterfaceiv(m_ProgramID, GL_UNIFORM, GL_MAX_NAME_LENGTH, &maxLength);
+
+			std::vector<char> name(maxLength);
+
+			for (int32 i = 0; i < count; i++)
+			{
+				int32 length;
+				int32 size;
+				uint32 type;
+				glGetActiveUniform(m_ProgramID, (uint32)i, maxLength, &length, &size, &type, name.data());
+			
+				ShaderUniform& uniform = m_Uniforms[name.data()];
+				uniform.Name = name.data();
+				uniform.Type = Utils::ShaderDataTypeFromOpenGLType(type);
+				uniform.Size = Utils::ShaderDataTypeSize(uniform.Type);
+				uniform.ComponentCount = Utils::ShaderDataTypeComponentCount(uniform.Type);
+				uniform.Location = glGetUniformLocation(m_ProgramID, uniform.Name.c_str());
+			}
+		}
 	}
+
 
 }
