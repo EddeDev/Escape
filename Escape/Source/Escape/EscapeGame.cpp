@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 namespace Escape {
 
@@ -38,8 +39,8 @@ namespace Escape {
 
 		EntityCreateInfo groundEntityCreateInfo;
 		groundEntityCreateInfo.IsDynamic = false;
-		groundEntityCreateInfo.Position = { 0.0f, -5.0f };
-		groundEntityCreateInfo.Scale = { 100.0f, 1.0f };
+		groundEntityCreateInfo.Position = { 0.0f, -10.0f };
+		groundEntityCreateInfo.Scale = { 100.0f, 10.0f };
 		groundEntityCreateInfo.Color = { 0.2f, 0.7f, 0.2f, 1.0f };
 		groundEntityCreateInfo.DebugName = "Ground";
 		m_GroundEntity = Ref<Entity>::Create(groundEntityCreateInfo);
@@ -68,7 +69,7 @@ namespace Escape {
 
 		EntityCreateInfo obstacle2EntityCreateInfo;
 		obstacle2EntityCreateInfo.IsDynamic = false;
-		obstacle2EntityCreateInfo.Position = { 5.0f, -4.0f };
+		obstacle2EntityCreateInfo.Position = { 5.0f, -4.5f };
 		obstacle2EntityCreateInfo.Scale = { 1.0f, 1.0f };
 		obstacle2EntityCreateInfo.Color = { 0.4f, 0.6f, 0.7f, 1.0f };
 		obstacle2EntityCreateInfo.DebugName = "Obstacle";
@@ -124,7 +125,13 @@ namespace Escape {
 		float y = m_Keyboard->GetVerticalAxis();
 
 		float playerSpeed = 1000.0f * deltaTime;
+		if (m_Keyboard->GetKey(KeyCode::LeftShift))
+			playerSpeed *= 2.0f;
+
 		m_PlayerEntity->SetLinearVelocity({ x * playerSpeed, m_PlayerEntity->GetLinearVelocity().y });
+
+		float cameraMoveSpeed = 2.0f * deltaTime;
+		m_Camera.SetPosition(glm::lerp(m_Camera.GetPosition(), m_PlayerEntity->GetPosition(), cameraMoveSpeed));
 
 #if 0
 		bool isGrounded = m_PlayerEntity->IsTouching(m_GroundEntity);

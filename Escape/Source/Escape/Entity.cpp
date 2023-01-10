@@ -72,8 +72,7 @@ namespace Escape {
 				const b2Body* bodyB = contact->GetFixtureB()->GetBody();
 
 				auto normal = contact->GetManifold()->localNormal;
-				// std::cout << normal.x << ", " << normal.y << std::endl;
-				if (normal.x == 0.0f && (normal.y < -0.75f || normal.y > 0.75f)) // TODO
+				if (normal.y == 1.0f || normal.y == -1.0f) // TODO
 					return true;
 			}
 		}
