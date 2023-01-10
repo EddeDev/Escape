@@ -54,6 +54,9 @@ namespace Escape {
 
 	void Renderer::BeginScene(const Camera& camera)
 	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
 		m_QuadVertexPointer = m_QuadVertexStorage;
 		m_QuadIndexCount = 0;
 
@@ -88,13 +91,14 @@ namespace Escape {
 		m_QuadIndexCount = 0;
 	}
 
-	void Renderer::RenderQuad(const glm::vec3& position, const glm::vec3& scale, const glm::vec4& color)
+	void Renderer::RenderQuad(const glm::vec3& position, float angle, const glm::vec3& scale, const glm::vec4& color)
 	{
 		if (m_QuadIndexCount >= s_MaxQuadIndices)
 			FlushQuads();
 
 		glm::mat4 transform = 
 			glm::translate(glm::mat4(1.0f), position) * 
+			glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) *
 			glm::scale(glm::mat4(1.0f), scale);
 
 		for (uint32 i = 0; i < 4; i++)

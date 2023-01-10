@@ -21,6 +21,7 @@ project "Escape"
         "%{prj.name}/Source/**.cpp",
         "%{prj.name}/Source/**.h",
 
+        "%{prj.name}/Libraries/glm/glm/**.h",
         "%{prj.name}/Libraries/glm/glm/**.hpp",
         "%{prj.name}/Libraries/glm/glm/**.inl"
     }
@@ -31,13 +32,15 @@ project "Escape"
         
         "%{prj.name}/Libraries/GLFW/include",
         "%{prj.name}/Libraries/Glad/include",
+        "%{prj.name}/Libraries/Box2D/include",
         "%{prj.name}/Libraries/glm"
     }
 
     links
     {
         "GLFW",
-        "Glad"
+        "Glad",
+        "Box2D"
     }
 
     filter "system:windows"
@@ -66,4 +69,5 @@ project "Escape"
 group "Libraries"
     include "Escape/Libraries/GLFW"
     include "Escape/Libraries/Glad"
+    include "Escape/Libraries/Box2D"
 group ""

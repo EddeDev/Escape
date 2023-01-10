@@ -108,6 +108,52 @@ namespace Escape {
 			for (auto& callback : data.ResizeCallbacks)
 				callback(width, height);
 		});
+
+		glfwSetKeyCallback(m_WindowHandle, [](auto window, auto key, auto scancode, auto action, auto mods)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			switch (action)
+			{
+			case GLFW_PRESS:
+			{
+				for (auto& callback : data.KeyPressCallbacks)
+					callback(key);
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				for (auto& callback : data.KeyReleaseCallbacks)
+					callback(key);
+				break;
+			}
+			case GLFW_REPEAT:
+			{
+				for (auto& callback : data.KeyRepeatCallbacks)
+					callback(key);
+				break;
+			}
+			}
+		});
+
+		glfwSetMouseButtonCallback(m_WindowHandle, [](auto window, auto button, auto action, auto mods)
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			switch (action)
+			{
+			case GLFW_PRESS:
+			{
+				for (auto& callback : data.MouseButtonPressCallbacks)
+					callback(button);
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				for (auto& callback : data.MouseButtonReleaseCallbacks)
+					callback(button);
+				break;
+			}
+			}
+		});
 	}
 
 	void Window::PollEvents()
@@ -118,6 +164,23 @@ namespace Escape {
 	void Window::SwapBuffers()
 	{
 		glfwSwapBuffers(m_WindowHandle);
+	}
+
+	float Window::GetTime() const
+	{
+		return glfwGetTime();
+	}
+
+	bool Window::IsKeyDown(int32 key) const
+	{
+		int32 state = glfwGetKey(m_WindowHandle, key);
+		return state == GLFW_PRESS;
+	}
+
+	bool Window::IsMouseButtonDown(int32 button) const
+	{
+		int32 state = glfwGetMouseButton(m_WindowHandle, button);
+		return state == GLFW_PRESS;
 	}
 
 }
