@@ -109,7 +109,13 @@ namespace Escape {
 
 	void Renderer::SetViewportSize(int32 width, int32 height)
 	{
-		glViewport(0, 0, width, height);
+		if (m_ViewportWidth != width || m_ViewportHeight != height)
+		{
+			glViewport(0, 0, width, height);
+
+			m_ViewportWidth = width;
+			m_ViewportHeight = height;
+		}
 	}
 
 }

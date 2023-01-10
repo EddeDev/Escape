@@ -34,6 +34,9 @@ namespace Escape {
 		CameraDataUB m_CameraData;
 		Ref<UniformBuffer> m_CameraDataUniformBuffer;
 
+		uint32 m_ViewportWidth = 0;
+		uint32 m_ViewportHeight = 0;
+
 		Ref<Shader> m_QuadShader;
 		Ref<GraphicsPipeline> m_QuadPipeline;
 
