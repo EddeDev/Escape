@@ -4,3 +4,6 @@
 [submodule "Escape/Libraries/GLFW"]
 	path = Escape/Libraries/GLFW
 	url = https://github.com/EddeDev/glfw
+[submodule "Escape/Libraries/Box2D"]
+	path = Escape/Libraries/Box2D
+	url = https://github.com/EddeDev/box2d
