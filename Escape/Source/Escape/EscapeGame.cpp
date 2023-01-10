@@ -31,14 +31,21 @@ namespace Escape {
 		m_Renderer->SetViewportSize(m_Window->GetWidth(), m_Window->GetHeight());
 
 		m_Camera = Camera(m_Window->GetWidth(), m_Window->GetHeight());
+		m_Camera.SetZoomLevel(7.0f);
 
 		while (m_Running)
 		{
 			m_Window->PollEvents();
 
 			m_Renderer->BeginScene(m_Camera);
-			m_Renderer->RenderQuad({ -0.6f, 0.0f, 0.0f });
-			m_Renderer->RenderQuad({ 0.6f, 0.0f, 0.0f });
+			m_Renderer->RenderQuad({ 0.0f, -5.0f, 0.0f }, { 10.0f, 1.0f, 1.0f }, { 0.2f, 0.7f, 0.2f, 1.0f });
+
+			// Player A
+			m_Renderer->RenderQuad({ -2.0f, 0.0f, 0.0f }, { 1.0f, 2.0f, 1.0f }, { 0.8f, 0.2f, 0.2f, 1.0f });
+
+			// Player B
+			m_Renderer->RenderQuad({ 2.0f, 0.0f, 0.0f }, { 1.0f, 2.0f, 1.0f }, { 0.2f, 0.2f, 0.8f, 1.0f });
+
 			m_Renderer->EndScene();
 
 			m_Window->SwapBuffers();

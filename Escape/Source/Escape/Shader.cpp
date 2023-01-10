@@ -241,7 +241,6 @@ namespace Escape {
 
 			std::vector<char> name(maxLength);
 
-			uint32 offset = 0;
 			for (int32 i = 0; i < count; i++)
 			{
 				int32 length;
@@ -251,18 +250,28 @@ namespace Escape {
 
 				ShaderAttribute& attribute = m_InputLayout.Attributes.emplace_back();
 				attribute.Name = name.data();
-				attribute.Index = i;
-				attribute.Offset = offset;
+				attribute.Index = glGetAttribLocation(m_ProgramID, name.data());
 				attribute.Type = Utils::ShaderDataTypeFromOpenGLType(type);
 				attribute.Size = Utils::ShaderDataTypeSize(attribute.Type);
 				attribute.ComponentCount = Utils::ShaderDataTypeComponentCount(attribute.Type);
+			}
 
+			std::sort(m_InputLayout.Attributes.begin(), m_InputLayout.Attributes.end(), [](const ShaderAttribute& a, const ShaderAttribute& b)
+			{
+				return a.Index < b.Index;
+			});
+
+			uint32 offset = 0;
+			for (int32 i = 0; i < count; i++)
+			{
+				ShaderAttribute& attribute = m_InputLayout.Attributes[i];
+				attribute.Offset = offset;
 				offset += attribute.Size;
 			}
 
 			m_InputLayout.Stride = offset;
 		}
-
+		
 		// Uniforms
 		{
 			int32 count = 0;
