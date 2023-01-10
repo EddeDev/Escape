@@ -76,6 +76,21 @@ namespace Escape {
 		m_Obstacle2Entity = Ref<Entity>::Create(obstacle2EntityCreateInfo);
 		m_Entities.push_back(m_Obstacle2Entity);
 
+		for (uint32 x = 0; x < 16; x++)
+		{
+			for (uint32 y = 0; y < 16; y++)
+			{
+				float offset = 0.05f;
+
+				EntityCreateInfo entityCreateInfo;
+				entityCreateInfo.IsDynamic = true;
+				entityCreateInfo.Position = { 20.0f + (float)x * (1.0f + offset), 5.0f + (float)y * (1.0f + offset) };
+				entityCreateInfo.Scale = { 1.0f, 1.0f };
+				entityCreateInfo.Color = { 0.3f, 0.8f, 0.5f, 1.0f };
+				m_Entities.push_back(Ref<Entity>::Create(entityCreateInfo));
+			}
+		}
+
 		m_Camera = Camera(m_Window->GetWidth(), m_Window->GetHeight());
 		m_Camera.SetZoomLevel(7.0f);
 
@@ -95,8 +110,29 @@ namespace Escape {
 			if (m_Keyboard->GetKeyDown(KeyCode::Escape))
 				m_Running = false;
 
-			Update(deltaTime);
-			m_PhysicsWorld->Step(deltaTime, velocityIterations, positionIterations);
+			// OnUpdate(deltaTime);
+
+			if (m_Accumulator > m_FixedTimestep)
+				m_Accumulator = 0.0f;
+
+			m_Accumulator += deltaTime;
+			if (m_Accumulator < m_FixedTimestep)
+			{
+				m_NumSubSteps = 0;
+			}
+			else
+			{
+				m_NumSubSteps = glm::min((uint32)(m_Accumulator / m_FixedTimestep), m_MaxSubSteps);
+				m_Accumulator -= (float)m_NumSubSteps * m_FixedTimestep;
+			}
+
+			if (m_NumSubSteps > 0)
+			{
+				OnFixedUpdate();
+
+				for (uint32 i = 0; i < m_NumSubSteps; i++)
+					m_PhysicsWorld->Step(m_FixedTimestep, velocityIterations, positionIterations);
+			}
 
 			m_Keyboard->Update();
 			m_Mouse->Update();
@@ -119,18 +155,25 @@ namespace Escape {
 		}
 	}
 
-	void EscapeGame::Update(float deltaTime)
+	void EscapeGame::OnUpdate(float deltaTime)
+	{
+		
+	}
+
+	void EscapeGame::OnFixedUpdate()
 	{
 		float x = m_Keyboard->GetHorizontalAxis();
 		float y = m_Keyboard->GetVerticalAxis();
 
-		float playerSpeed = 1000.0f * deltaTime;
+		float playerSpeed = 500.0f * m_FixedTimestep;
 		if (m_Keyboard->GetKey(KeyCode::LeftShift))
 			playerSpeed *= 2.0f;
 
+		m_Camera.SetZoomLevel(m_Camera.GetZoomLevel() + (-y * 2.0f * m_FixedTimestep));
+
 		m_PlayerEntity->SetLinearVelocity({ x * playerSpeed, m_PlayerEntity->GetLinearVelocity().y });
 
-		float cameraMoveSpeed = 2.0f * deltaTime;
+		float cameraMoveSpeed = 2.0f * m_FixedTimestep;
 		m_Camera.SetPosition(glm::lerp(m_Camera.GetPosition(), m_PlayerEntity->GetPosition(), cameraMoveSpeed));
 
 #if 0

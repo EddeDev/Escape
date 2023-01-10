@@ -31,7 +31,8 @@ namespace Escape {
 
 		static EscapeGame& Get() { return *s_Instance; }
 	private:
-		void Update(float deltaTime);
+		void OnUpdate(float deltaTime);
+		void OnFixedUpdate();
 
 		void OnWindowClose();
 		void OnWindowResize(int32 width, int32 height);
@@ -45,6 +46,10 @@ namespace Escape {
 		bool m_Running = true;
 
 		b2World* m_PhysicsWorld = nullptr;
+		float m_Accumulator = 0.0f;
+		float m_FixedTimestep = 1.0f / 100.0f;
+		uint32 m_NumSubSteps = 0;
+		uint32 m_MaxSubSteps = 8;
 
 		std::vector<Ref<Entity>> m_Entities;
 		Ref<Entity> m_GroundEntity;
