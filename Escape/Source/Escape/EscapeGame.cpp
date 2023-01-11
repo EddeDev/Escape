@@ -110,7 +110,7 @@ namespace Escape {
 			if (m_Keyboard->GetKeyDown(KeyCode::Escape))
 				m_Running = false;
 
-			// OnUpdate(deltaTime);
+			OnUpdate(deltaTime);
 
 			if (m_Accumulator > m_FixedTimestep)
 				m_Accumulator = 0.0f;
@@ -162,31 +162,35 @@ namespace Escape {
 
 	void EscapeGame::OnFixedUpdate()
 	{
-		float x = m_Keyboard->GetHorizontalAxis();
-		float y = m_Keyboard->GetVerticalAxis();
-
-		float playerSpeed = 500.0f * m_FixedTimestep;
-		if (m_Keyboard->GetKey(KeyCode::LeftShift))
-			playerSpeed *= 2.0f;
-
-		m_Camera.SetZoomLevel(m_Camera.GetZoomLevel() + (-y * 2.0f * m_FixedTimestep));
-
-		m_PlayerEntity->SetLinearVelocity({ x * playerSpeed, m_PlayerEntity->GetLinearVelocity().y });
-
-		float cameraMoveSpeed = 2.0f * m_FixedTimestep;
-		m_Camera.SetPosition(glm::lerp(m_Camera.GetPosition(), m_PlayerEntity->GetPosition(), cameraMoveSpeed));
-
 #if 0
 		bool isGrounded = m_PlayerEntity->IsTouching(m_GroundEntity);
 #else
 		bool isGrounded = m_PlayerEntity->IsGrounded();
 #endif
+
+		float x = m_Keyboard->GetHorizontalAxis();
+		float y = m_Keyboard->GetVerticalAxis();
+
+		if (isGrounded)
+		{
+			float playerSpeed = 500.0f * m_FixedTimestep;
+			if (m_Keyboard->GetKey(KeyCode::LeftShift))
+				playerSpeed *= 2.0f;
+
+			m_PlayerEntity->SetLinearVelocity({ x * playerSpeed, m_PlayerEntity->GetLinearVelocity().y });
+		}
+
+		m_Camera.SetZoomLevel(m_Camera.GetZoomLevel() + (-y * 2.0f * m_FixedTimestep));
+
+		float cameraMoveSpeed = 2.0f * m_FixedTimestep;
+		m_Camera.SetPosition(glm::lerp(m_Camera.GetPosition(), m_PlayerEntity->GetPosition(), cameraMoveSpeed));
+
 		if (isGrounded)
 		{
 			if (m_Keyboard->GetKey(KeyCode::Space))
 			{
 				float jumpForce = 5.0f;
-				m_PlayerEntity->SetLinearVelocity({ 0.0f, jumpForce });
+				m_PlayerEntity->SetLinearVelocity({ m_PlayerEntity->GetLinearVelocity().x, jumpForce });
 			}
 		}
 	}
