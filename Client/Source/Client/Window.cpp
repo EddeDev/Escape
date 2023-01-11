@@ -112,6 +112,11 @@ namespace esc {
 		glfwSetKeyCallback(m_WindowHandle, [](auto window, auto key, auto scancode, auto action, auto mods)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			
+			// TODO: Temp bugfix	
+			if (key < 0)
+				return;
+
 			switch (action)
 			{
 			case GLFW_PRESS:

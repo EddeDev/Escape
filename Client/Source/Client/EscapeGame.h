@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Gamepad.h"
 
 #include "Shader.h"
 #include "GraphicsPipeline.h"
@@ -36,6 +37,9 @@ namespace esc {
 		void OnUpdate(float deltaTime);
 		void OnFixedUpdate();
 
+		float GetHorizontalAxis(bool right = false) const;
+		float GetVerticalAxis(bool right = false, bool gamepadInvert = false) const;
+
 		void OnWindowClose();
 		void OnWindowResize(int32 width, int32 height);
 	private:
@@ -44,6 +48,7 @@ namespace esc {
 		Ref<Window> m_Window;
 		Ref<Keyboard> m_Keyboard;
 		Ref<Mouse> m_Mouse;
+		Ref<Gamepad> m_Gamepad;
 		Ref<Renderer> m_Renderer;
 		bool m_Running = true;
 

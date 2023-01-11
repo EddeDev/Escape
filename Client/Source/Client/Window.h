@@ -31,7 +31,7 @@ namespace esc {
 		void AddKeyRepeatCallback(const std::function<void(int32)>& callback) { m_Data.KeyRepeatCallbacks.push_back(callback); }
 		void AddMouseButtonPressCallback(const std::function<void(int32)>& callback) { m_Data.MouseButtonPressCallbacks.push_back(callback); }
 		void AddMouseButtonReleaseCallback(const std::function<void(int32)>& callback) { m_Data.MouseButtonReleaseCallbacks.push_back(callback); }
-	
+
 		float GetAspectRatio() const { return (float)m_Data.Width / (float)m_Data.Height; }
 		int32 GetWidth() const { return m_Data.Width; }
 		int32 GetHeight() const { return m_Data.Height; }

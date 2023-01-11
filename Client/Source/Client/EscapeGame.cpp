@@ -24,8 +24,18 @@ namespace esc {
 
 		m_Keyboard = Ref<Keyboard>::Create(m_Window);
 		m_Mouse = Ref<Mouse>::Create(m_Window);
+		m_Gamepad = Ref<Gamepad>::Create(m_Window);
 
-		m_Client = Ref<Client>::Create(address, port);
+		ClientCreateInfo clientCreateInfo;
+		clientCreateInfo.Address = address;
+		clientCreateInfo.Port = port;
+		clientCreateInfo.NoDelay = true;
+		clientCreateInfo.Blocking = false;
+		clientCreateInfo.KeepAlive = false;
+		clientCreateInfo.ReuseAddress = false;
+		clientCreateInfo.TrafficClass = 24;
+		clientCreateInfo.Timeout = 100;
+		m_Client = Ref<Client>::Create(clientCreateInfo);
 	}
 
 	EscapeGame::~EscapeGame()
@@ -164,13 +174,13 @@ namespace esc {
 
 	void EscapeGame::OnFixedUpdate()
 	{
-		float x = m_Keyboard->GetHorizontalAxis();
-		float y = m_Keyboard->GetVerticalAxis();
+		float x = GetHorizontalAxis();
 
 		float playerSpeed = 500.0f * m_FixedTimestep;
-		if (m_Keyboard->GetKey(KeyCode::LeftShift))
+		if (m_Keyboard->GetKey(KeyCode::LeftShift) || m_Gamepad->GetAxis(GamepadAxisCode::RightTrigger) > 0.0f)
 			playerSpeed *= 2.0f;
 
+		float y = GetVerticalAxis(true, true);
 		m_Camera.SetZoomLevel(m_Camera.GetZoomLevel() + (-y * 2.0f * m_FixedTimestep));
 
 		m_PlayerEntity->SetLinearVelocity({ x * playerSpeed, m_PlayerEntity->GetLinearVelocity().y });
@@ -185,12 +195,41 @@ namespace esc {
 #endif
 		if (isGrounded)
 		{
-			if (m_Keyboard->GetKey(KeyCode::Space))
+			if (m_Keyboard->GetKey(KeyCode::Space) || m_Gamepad->GetButton(GamepadButtonCode::A))
 			{
 				float jumpForce = 5.0f;
 				m_PlayerEntity->SetLinearVelocity({ 0.0f, jumpForce });
 			}
 		}
+	}
+
+#define GAMEPAD_AXIS_OFFSET 0.1
+
+	float EscapeGame::GetHorizontalAxis(bool right) const
+	{
+		float gamepadAxis = m_Gamepad->GetAxis(right ? GamepadAxisCode::RightX : GamepadAxisCode::LeftX);
+		float keyboardAxis = m_Keyboard->GetHorizontalAxis();
+
+		float result = glm::clamp(gamepadAxis + keyboardAxis, -1.0f, 1.0f);
+		if (result <= GAMEPAD_AXIS_OFFSET && result >= -GAMEPAD_AXIS_OFFSET)
+			return 0.0f;
+
+		return result;
+	}
+
+	float EscapeGame::GetVerticalAxis(bool right, bool gamepadInvert) const
+	{
+		float gamepadAxis = m_Gamepad->GetAxis(right ? GamepadAxisCode::RightY : GamepadAxisCode::LeftY);
+		if (gamepadInvert)
+			gamepadAxis = -gamepadAxis;
+
+		float keyboardAxis = m_Keyboard->GetVerticalAxis();
+
+		float result = glm::clamp(gamepadAxis + keyboardAxis, -1.0f, 1.0f);
+		if (result <= GAMEPAD_AXIS_OFFSET && result >= -GAMEPAD_AXIS_OFFSET)
+			return 0.0f;
+
+		return result;
 	}
 
 	void EscapeGame::OnWindowClose()
