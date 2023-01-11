@@ -1,9 +1,9 @@
-[submodule "Escape/Libraries/glm"]
-	path = Escape/Libraries/glm
-	url = https://github.com/g-truc/glm
-[submodule "Escape/Libraries/GLFW"]
-	path = Escape/Libraries/GLFW
-	url = https://github.com/EddeDev/glfw
-[submodule "Escape/Libraries/Box2D"]
-	path = Escape/Libraries/Box2D
+[submodule "Client/Libraries/Box2D"]
+	path = Client/Libraries/Box2D
 	url = https://github.com/EddeDev/box2d
+[submodule "Client/Libraries/GLFW"]
+	path = Client/Libraries/GLFW
+	url = https://github.com/EddeDev/glfw
+[submodule "Client/Libraries/glm"]
+	path = Client/Libraries/glm
+	url = https://github.com/g-truc/glm
