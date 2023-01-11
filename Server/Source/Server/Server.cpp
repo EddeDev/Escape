@@ -9,17 +9,6 @@
 
 namespace esc {
 
-	namespace Utils {
-
-		void* GetInAddr(sockaddr* addr)
-		{
-			if (addr->sa_family == AF_INET)
-				return &(((sockaddr_in*)addr)->sin_addr);
-			return &(((sockaddr_in6*)addr)->sin6_addr);
-		}
-
-	}
-
 	Server::Server(uint16 port)
 	{
 		SetConsoleTitleA("Server");

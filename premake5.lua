@@ -92,6 +92,8 @@ project "Client"
         "AdvApi32.lib"
     }
 
+    defines "_WINSOCK_DEPRECATED_NO_WARNINGS"
+
     filter "system:windows"
         systemversion "latest"
         defines "ESCAPE_PLATFORM_WINDOWS"
@@ -142,6 +144,8 @@ project "Server"
     
         "Ws2_32.lib"
     }
+
+    defines "_WINSOCK_DEPRECATED_NO_WARNINGS"
 
     filter "system:windows"
         systemversion "latest"

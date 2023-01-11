@@ -7,7 +7,7 @@ namespace esc {
 
 	Renderer::Renderer()
 	{
-		m_CameraDataUniformBuffer = Ref<UniformBuffer>::Create(sizeof(CameraDataUB), 0);
+		m_CameraDataUniformBuffer = Ref<UniformBuffer>::Create(static_cast<uint32>(sizeof(CameraDataUB)), 0);
 
 		// Quads
 		{
@@ -18,7 +18,7 @@ namespace esc {
 			pipelineCreateInfo.Topology = PrimitiveTopology::Triangles;
 			m_QuadPipeline = Ref<GraphicsPipeline>::Create(pipelineCreateInfo);
 
-			m_QuadVertexBuffer = Ref<VertexBuffer>::Create(s_MaxQuadVertices * sizeof(QuadVertex));
+			m_QuadVertexBuffer = Ref<VertexBuffer>::Create(static_cast<uint32>(s_MaxQuadVertices * sizeof(QuadVertex)));
 			m_QuadVertexStorage = new QuadVertex[s_MaxQuadVertices];
 			memset(m_QuadVertexStorage, 0, s_MaxQuadVertices * sizeof(QuadVertex));
 
@@ -37,7 +37,7 @@ namespace esc {
 				offset += 4;
 			}
 			
-			m_QuadIndexBuffer = Ref<IndexBuffer>::Create(indices, s_MaxQuadIndices * sizeof(uint32));
+			m_QuadIndexBuffer = Ref<IndexBuffer>::Create(indices, static_cast<uint32>(s_MaxQuadIndices * sizeof(uint32)));
 			delete[] indices;
 
 			m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
@@ -76,7 +76,7 @@ namespace esc {
 	{
 		if (m_QuadIndexCount)
 		{
-			size_t bufferSize = static_cast<size_t>((uint8*)m_QuadVertexPointer - (uint8*)m_QuadVertexStorage);
+			uint32 bufferSize = static_cast<uint32>((uint8*)m_QuadVertexPointer - (uint8*)m_QuadVertexStorage);
 			m_QuadVertexBuffer->SetData(m_QuadVertexStorage, bufferSize);
 
 			m_QuadVertexBuffer->Bind();

@@ -168,7 +168,7 @@ namespace esc {
 
 	float Window::GetTime() const
 	{
-		return glfwGetTime();
+		return static_cast<float>(glfwGetTime());
 	}
 
 	bool Window::IsKeyDown(int32 key) const
