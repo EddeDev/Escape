@@ -39,7 +39,18 @@ namespace esc {
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
-		m_WindowHandle = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		if (createInfo.Fullscreen)
+		{
+			auto videomode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+			m_Data.Width = videomode->width;
+			m_Data.Height = videomode->height;
+			m_WindowHandle = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), glfwGetPrimaryMonitor(), nullptr);
+		}
+		else
+		{
+			m_WindowHandle = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		}
+
 		if (!m_WindowHandle)
 		{
 			std::cout << "Failed to create GLFW window!" << std::endl;

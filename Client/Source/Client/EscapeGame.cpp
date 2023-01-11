@@ -16,6 +16,7 @@ namespace esc {
 		WindowCreateInfo windowCreateInfo;
 		windowCreateInfo.Width = 1280;
 		windowCreateInfo.Height = 720;
+		windowCreateInfo.Fullscreen = true;
 		windowCreateInfo.Title = "Escape";
 
 		m_Window = Ref<Window>::Create(windowCreateInfo);
@@ -88,9 +89,9 @@ namespace esc {
 		m_Obstacle2Entity = Ref<Entity>::Create(obstacle2EntityCreateInfo);
 		m_Entities.push_back(m_Obstacle2Entity);
 
-		for (uint32 x = 0; x < 16; x++)
+		for (uint32 x = 0; x < 8; x++)
 		{
-			for (uint32 y = 0; y < 16; y++)
+			for (uint32 y = 0; y < 8; y++)
 			{
 				float offset = 0.05f;
 
@@ -110,12 +111,22 @@ namespace esc {
 		int32 positionIterations = 3;
 
 		float lastTime = m_Window->GetTime();
+		float lastFrameTime = m_Window->GetTime();
+		uint32 frames = 0;
 
 		while (m_Running)
 		{
 			float time = m_Window->GetTime();
 			float deltaTime = time - lastTime;
 			lastTime = time;
+
+			frames++;
+			while (time >= lastFrameTime + 1.0f)
+			{
+				std::cout << frames << " fps" << std::endl;
+				lastFrameTime += 1.0f;
+				frames = 0;
+			}
 
 			m_Window->PollEvents();
 
@@ -151,7 +162,7 @@ namespace esc {
 
 			m_Renderer->BeginScene(m_Camera);
 
-			for (auto& entity : m_Entities)
+			for (Ref<Entity> entity : m_Entities)
 			{
 				glm::vec3 position = { entity->GetPosition().x, entity->GetPosition().y, 0.0f };
 				float angle = entity->GetAngle();

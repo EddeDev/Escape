@@ -8,6 +8,7 @@ namespace esc {
 	{
 		int32 Width = 1280, Height = 720;
 		std::string Title = "Game";
+		bool Fullscreen = false;
 	};
 
 	class Window : public ReferenceCounted
