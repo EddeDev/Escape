@@ -1,18 +1,24 @@
 #include "ServerPCH.h"
 
-#define ESCAPE_TEST_ADDRESS "127.0.0.1"
-#define ESCAPE_DEFAULT_PORT 42650
+#include "Server.h"
+
+#include <Windows.h>
 
 namespace esc {
 
-	void Run()
+	void Main()
 	{
+		SetConsoleTitleW(L"Server");
+
+		Server::Start(20, 42650);
+
+		std::cin.get();
 	}
 
 }
 
 int main()
 {
-	esc::Run();
+	esc::Main();
 	return 0;
 }

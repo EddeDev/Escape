@@ -6,9 +6,10 @@ workspace "Escape"
 
     targetdir ("Build/Bin/%{cfg.buildcfg}/%{prj.name}")
     objdir ("Build/Obj/%{cfg.buildcfg}/%{prj.name}")
-
+    
 group "Core"
     project "Core"
+        kind "None"
         language "C++"
         cppdialect "C++latest"
         location "%{prj.name}"
@@ -16,13 +17,18 @@ group "Core"
 
         files
         {
-            "%{prj.name}/Source/**.cpp",
             "%{prj.name}/Source/**.h"
         }
 
         includedirs
         {
-            "%{prj.name}/Source"
+            "%{prj.name}/Source",
+            "%{prj.name}/Libraries/ENet/include"
+        }
+
+        links
+        {
+            "ENet"
         }
 
         filter "system:windows"
@@ -30,19 +36,16 @@ group "Core"
             defines "ESCAPE_PLATFORM_WINDOWS"
 
         filter "configurations:Debug"
-            kind "ConsoleApp"
             defines "ESCAPE_BUILD_DEBUG"
             runtime "Debug"
             symbols "On"
 
         filter "configurations:Release"
-            kind "ConsoleApp"
             defines "ESCAPE_BUILD_RELEASE"
             runtime "Release"
             optimize "On"
 
         filter "configurations:Shipping"
-            kind "ConsoleApp"
             defines "ESCAPE_BUILD_SHIPPING"
             runtime "Release"
             optimize "On"
@@ -75,8 +78,8 @@ project "Client"
         
         "%{prj.name}/Libraries/GLFW/include",
         "%{prj.name}/Libraries/Glad/include",
+        "%{prj.name}/Libraries/Box2D/include",
         "%{prj.name}/Libraries/glm",
-        "%{prj.name}/Libraries/Box2D/include"
     }
 
     links
@@ -89,18 +92,27 @@ project "Client"
 
         "Ws2_32.lib",
         "Mswsock.lib",
-        "AdvApi32.lib"
+        "AdvApi32.lib",
+        "secur32.lib",
+        "winmm.lib",
+        "dmoguids.lib",
+        "wmcodecdspuuid.lib",
+        "msdmo.lib",
+        "Strmiids.lib"
     }
 
     defines
     {
-        "GLM_FORCE_DEPTH_ZERO_TO_ONE",   
-        "_WINSOCK_DEPRECATED_NO_WARNINGS"
+        "GLM_FORCE_DEPTH_ZERO_TO_ONE"
     }
 
     filter "system:windows"
         systemversion "latest"
-        defines "ESCAPE_PLATFORM_WINDOWS"
+        defines
+        {
+            "ESCAPE_PLATFORM_WINDOWS",
+            "NOMINMAX"
+        }
     
     filter "configurations:Debug"
         kind "ConsoleApp"
@@ -139,17 +151,21 @@ project "Server"
     includedirs
     {
         "%{prj.name}/Source",
-        "%{wks.location}/Core/Source",
+        "%{wks.location}/Core/Source"
     }
     
     links
     {
-        "Core",   
+        "Core",
     
-        "Ws2_32.lib"
+        "Ws2_32.lib",
+        "secur32.lib",
+        "winmm.lib",
+        "dmoguids.lib",
+        "wmcodecdspuuid.lib",
+        "msdmo.lib",
+        "Strmiids.lib"
     }
-
-    defines "_WINSOCK_DEPRECATED_NO_WARNINGS"
 
     filter "system:windows"
         systemversion "latest"
@@ -175,6 +191,10 @@ project "Server"
         symbols "Off"
 
 group "Libraries"
+    -- Core
+    include "Core/Libraries/ENet"
+
+    -- Client    
     include "Client/Libraries/GLFW"
     include "Client/Libraries/Glad"
     include "Client/Libraries/Box2D"

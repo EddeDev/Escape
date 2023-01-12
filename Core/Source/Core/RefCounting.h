@@ -2,6 +2,8 @@
 
 #include "PrimitiveTypes.h"
 
+#include <atomic>
+
 namespace esc {
 
 	class ReferenceCounted
