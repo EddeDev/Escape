@@ -40,7 +40,7 @@ namespace esc {
 		Ref<Shader> m_QuadShader;
 		Ref<GraphicsPipeline> m_QuadPipeline;
 
-		static const uint32 s_MaxQuads = 1000;
+		static const uint32 s_MaxQuads = 10000;
 		static const uint32 s_MaxQuadVertices = s_MaxQuads * 4;
 		static const uint32 s_MaxQuadIndices = s_MaxQuads * 6;
 

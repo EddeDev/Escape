@@ -92,7 +92,11 @@ project "Client"
         "AdvApi32.lib"
     }
 
-    defines "_WINSOCK_DEPRECATED_NO_WARNINGS"
+    defines
+    {
+        "GLM_FORCE_DEPTH_ZERO_TO_ONE",   
+        "_WINSOCK_DEPRECATED_NO_WARNINGS"
+    }
 
     filter "system:windows"
         systemversion "latest"

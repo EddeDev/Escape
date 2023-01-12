@@ -16,8 +16,6 @@
 #include "Camera.h"
 #include "Entity.h"
 
-#include "Client.h"
-
 #include <box2d/b2_world.h>
 
 namespace esc {
@@ -65,8 +63,6 @@ namespace esc {
 		Ref<Entity> m_PlayerEntity;
 
 		Camera m_Camera;
-
-		Ref<Client> m_Client;
 	};
 
 }

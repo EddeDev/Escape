@@ -11,5 +11,8 @@ layout(location = 0) in VertexOutput Input;
 
 void main()
 {
-	o_Color = Input.Color;
+	vec4 color = Input.Color;
+	if (color.a == 0.0)
+		discard;
+	o_Color = color;
 }

@@ -62,6 +62,22 @@ namespace esc {
 			else
 				glVertexAttribPointer(attribute.Index, attribute.ComponentCount, type, GL_FALSE, inputLayout.Stride, (const void*)(uintptr_t)attribute.Offset);
 		}
+
+#define GL_SET_PROPERTY(cap, enabled) if (enabled) glEnable(cap); else glDisable(cap);
+
+		glPolygonMode(GL_FRONT_AND_BACK, m_CreateInfo.Wireframe ? GL_LINE : GL_FILL);
+		GL_SET_PROPERTY(GL_DEPTH_CLAMP, false);
+		GL_SET_PROPERTY(GL_RASTERIZER_DISCARD, false);
+		glLineWidth(m_CreateInfo.LineWidth);
+		GL_SET_PROPERTY(GL_LINE_SMOOTH, m_CreateInfo.AntialiasedLines);
+
+		GL_SET_PROPERTY(GL_DEPTH_TEST, m_CreateInfo.DepthTest);
+		glDepthMask(m_CreateInfo.DepthWrite);
+		glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+		glDepthRange(0.0f, 1.0f);
+
+		GL_SET_PROPERTY(GL_BLEND, true);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	void GraphicsPipeline::DrawIndexed(uint32 indexCount) const

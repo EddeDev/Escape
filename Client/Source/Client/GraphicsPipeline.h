@@ -13,6 +13,11 @@ namespace esc {
 	{
 		Ref<Shader> Shader;
 		PrimitiveTopology Topology = PrimitiveTopology::Triangles;
+		bool DepthTest = true;
+		bool DepthWrite = true;
+		bool Wireframe = false;
+		bool AntialiasedLines = true;
+		float LineWidth = 2.0f;
 	};
 
 	class GraphicsPipeline : public ReferenceCounted

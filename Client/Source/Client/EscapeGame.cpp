@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/compatibility.hpp>
 
+#include <glad/glad.h>
+
 namespace esc {
 
 	EscapeGame::EscapeGame(const std::string& address, uint16 port)
@@ -26,17 +28,6 @@ namespace esc {
 		m_Keyboard = Ref<Keyboard>::Create(m_Window);
 		m_Mouse = Ref<Mouse>::Create(m_Window);
 		m_Gamepad = Ref<Gamepad>::Create(m_Window);
-
-		ClientCreateInfo clientCreateInfo;
-		clientCreateInfo.Address = address;
-		clientCreateInfo.Port = port;
-		clientCreateInfo.NoDelay = true;
-		clientCreateInfo.Blocking = false;
-		clientCreateInfo.KeepAlive = false;
-		clientCreateInfo.ReuseAddress = false;
-		clientCreateInfo.TrafficClass = 24;
-		clientCreateInfo.Timeout = 100;
-		m_Client = Ref<Client>::Create(clientCreateInfo);
 	}
 
 	EscapeGame::~EscapeGame()
@@ -159,6 +150,9 @@ namespace esc {
 
 			m_Keyboard->Update();
 			m_Mouse->Update();
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
 			m_Renderer->BeginScene(m_Camera);
 
