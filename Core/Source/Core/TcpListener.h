@@ -6,9 +6,6 @@
 #include "Async.h"
 #include "TcpClient.h"
 
-#include <iostream>
-#include <string>
-
 namespace esc {
 
 	class TcpListener : public ReferenceCounted

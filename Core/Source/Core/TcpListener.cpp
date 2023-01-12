@@ -1,5 +1,7 @@
 #include "TcpListener.h"
 
+#include <iostream>
+
 #include <enet/enet.h>
 
 namespace esc {
@@ -33,7 +35,6 @@ namespace esc {
 
 	void TcpListener::Start()
 	{
-
 	}
 
 	void TcpListener::BeginAcceptTcpClient(const AsyncCallbackFn& callback, const void* state)

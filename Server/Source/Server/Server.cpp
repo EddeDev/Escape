@@ -24,10 +24,7 @@ namespace esc {
 		std::cout << "Starting server..." << std::endl;
 		InitializeServerData();
 
-		TcpListenerCreateInfo listenerCreateInfo;
-		listenerCreateInfo.Port = port;
-		
-		s_Data.Listener = Ref<TcpListener>::Create(listenerCreateInfo);
+		s_Data.Listener = Ref<TcpListener>::Create(port);
 		s_Data.Listener->Start();
 		s_Data.Listener->BeginAcceptTcpClient(ESCAPE_BIND_CALLBACK(TcpConnectCallback), nullptr);
 
