@@ -9,7 +9,7 @@ workspace "Escape"
     
 group "Core"
     project "Core"
-        kind "None"
+        kind "StaticLib"
         language "C++"
         cppdialect "C++latest"
         location "%{prj.name}"

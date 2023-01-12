@@ -6,43 +6,23 @@
 #include "Async.h"
 #include "TcpClient.h"
 
+#include <iostream>
 #include <string>
 
 namespace esc {
 
-	struct TcpListenerCreateInfo
-	{
-		std::string Address = "127.0.0.1";
-		uint16 Port = 0;
-	};
-
 	class TcpListener : public ReferenceCounted
 	{
 	public:
-		TcpListener(const TcpListenerCreateInfo& createInfo)
-		{
+		TcpListener(uint16 port);
+		virtual ~TcpListener();
 
-		}
+		void Start();
 
-		virtual ~TcpListener()
-		{
-
-		}
-
-		void Start()
-		{
-
-		}
-
-		void BeginAcceptTcpClient(const AsyncCallbackFn& callback, const void* state)
-		{
-
-		}
-
-		Ref<TcpClient> EndAcceptTcpClient(const AsyncResult& result)
-		{
-			return nullptr;
-		}
+		void BeginAcceptTcpClient(const AsyncCallbackFn& callback, const void* state);
+		Ref<TcpClient> EndAcceptTcpClient(const AsyncResult& result);
+	private:
+		void* m_Server = nullptr;
 	};
 
 }
