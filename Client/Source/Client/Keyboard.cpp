@@ -3,7 +3,7 @@
 
 namespace esc {
 
-	Keyboard::Keyboard(Ref<Window> window)
+	Keyboard::Keyboard(Ref<Window>& window)
 		: m_Window(window)
 	{
 		m_StateBitFields.resize(KeyCode::Last);

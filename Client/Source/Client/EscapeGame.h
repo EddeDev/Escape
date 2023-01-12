@@ -16,6 +16,8 @@
 #include "Camera.h"
 #include "Entity.h"
 
+#include "Client.h"
+
 #include <box2d/b2_world.h>
 
 namespace esc {
@@ -23,7 +25,7 @@ namespace esc {
 	class EscapeGame
 	{
 	public:
-		EscapeGame(const std::string& address, uint16 port);
+		EscapeGame(const std::string& address, uint16 port, const std::string& username);
 		~EscapeGame();
 
 		void Run();
@@ -49,6 +51,8 @@ namespace esc {
 		Ref<Gamepad> m_Gamepad;
 		Ref<Renderer> m_Renderer;
 		bool m_Running = true;
+
+		Ref<Client> m_Client;
 
 		b2World* m_PhysicsWorld = nullptr;
 		float m_Accumulator = 0.0f;

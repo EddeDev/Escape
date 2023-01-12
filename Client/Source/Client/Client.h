@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/TCPClient.h"
+#include <enet/enet.h>
 
 namespace esc {
 
@@ -8,9 +8,9 @@ namespace esc {
 	{
 		std::string Address = "127.0.0.1";
 		uint16 Port = 42650;
-	};
 
-	class TCP;
+		std::string Username;
+	};
 
 	class Client : public ReferenceCounted
 	{
@@ -18,30 +18,22 @@ namespace esc {
 		Client(const ClientCreateInfo& createInfo);
 		virtual ~Client();
 
-		const ClientCreateInfo& GetCreateInfo() const { return m_CreateInfo; }
-
-		static Client& Get() { return *s_Instance; }
+		void Update();
 	private:
-		inline static Client* s_Instance = nullptr;
-
+		void ParsePacketData(uint8* data);
+	private:
 		ClientCreateInfo m_CreateInfo;
-		TCP* m_TCP = nullptr;
-	};
+		ENetHost* m_Client = nullptr;
+		ENetPeer* m_Peer = nullptr;
 
-	class TCP
-	{
-	public:
-		TCP() = default;
-
-		void Connect();
-	private:
-		void ConnectCallback(const AsyncResult& result);
-		void ReceiveCallback(const AsyncResult& result);
-	private:
-		Ref<TcpClient> m_Socket;
-		Ref<NetworkStream> m_Stream;
-
-		uint8* m_ReceiveBuffer = nullptr;
+		int32 m_ID = -1;
+	
+		struct ClientData
+		{
+			uint32 ID;
+			std::string Username;
+		};
+		std::map<uint32, ClientData> m_ClientData;
 	};
 
 }

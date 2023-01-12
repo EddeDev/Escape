@@ -9,7 +9,7 @@ workspace "Escape"
     
 group "Core"
     project "Core"
-        kind "StaticLib"
+        kind "None"
         language "C++"
         cppdialect "C++latest"
         location "%{prj.name}"
@@ -17,20 +17,12 @@ group "Core"
 
         files
         {
+            "%{prj.name}/Source/**.cpp",
             "%{prj.name}/Source/**.h"
         }
 
-        includedirs
-        {
-            "%{prj.name}/Source",
-            "%{prj.name}/Libraries/ENet/include"
-        }
-
-        links
-        {
-            "ENet"
-        }
-
+        includedirs "%{prj.name}/Source"
+        
         filter "system:windows"
             systemversion "latest"
             defines "ESCAPE_PLATFORM_WINDOWS"
@@ -75,6 +67,7 @@ project "Client"
     {
         "%{prj.name}/Source",
         "%{wks.location}/Core/Source",
+        "%{wks.location}/Core/Libraries/ENet/include",
         
         "%{prj.name}/Libraries/GLFW/include",
         "%{prj.name}/Libraries/Glad/include",
@@ -85,6 +78,7 @@ project "Client"
     links
     {
         "Core",
+        "ENet",
 
         "GLFW",
         "Glad",
@@ -151,12 +145,14 @@ project "Server"
     includedirs
     {
         "%{prj.name}/Source",
-        "%{wks.location}/Core/Source"
+        "%{wks.location}/Core/Source",
+        "%{wks.location}/Core/Libraries/ENet/include"
     }
     
     links
     {
         "Core",
+        "ENet",
     
         "Ws2_32.lib",
         "secur32.lib",

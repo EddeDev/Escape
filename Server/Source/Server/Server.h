@@ -1,16 +1,39 @@
 #pragma once
 
-#include "Core/TcpListener.h"
+#include <enet/enet.h>
 
 namespace esc {
+
+	struct ServerCreateInfo
+	{
+		uint32 MaxPlayers = 0;
+		uint16 Port = 0;
+	};
 
 	class Server
 	{
 	public:
-		static void Start(uint32 maxPlayers, uint16 port);
+		Server(const ServerCreateInfo& createInfo);
+		~Server();
+
+		void Update();
 	private:
-		static void TcpConnectCallback(const AsyncResult& result);
-		static void InitializeServerData();
+		void OnClientConnect(ENetPeer* peer);
+		void OnClientDisconnect(ENetPeer* peer);
+	
+		void PrintClientMap() const;
+
+		void ParseData(int32 id, uint8* data);
+	private:
+		ServerCreateInfo m_CreateInfo;
+		ENetHost* m_Server = nullptr;
+
+		struct ClientData
+		{
+			ENetPeer* Peer = nullptr;
+			std::string Username = "";
+		};
+		std::map<uint32, ClientData> m_Clients;
 	};
 
 }

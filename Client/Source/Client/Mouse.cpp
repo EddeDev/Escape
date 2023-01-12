@@ -3,7 +3,7 @@
 
 namespace esc {
 
-	Mouse::Mouse(Ref<Window> window)
+	Mouse::Mouse(Ref<Window>& window)
 		: m_Window(window)
 	{
 		m_StateBitFields.resize(MouseButtonCode::ButtonLast);

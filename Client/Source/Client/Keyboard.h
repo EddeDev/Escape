@@ -132,7 +132,7 @@ namespace esc {
 	class Keyboard : public ReferenceCounted
 	{
 	public:
-		Keyboard(Ref<Window> window);
+		Keyboard(Ref<Window>& window);
 		virtual ~Keyboard() {}
 
 		void Update();
@@ -148,7 +148,7 @@ namespace esc {
 		void OnKeyRelease(int32 key);
 		void OnKeyRepeat(int32 key);
 	private:
-		Ref<Window> m_Window;
+		Ref<Window>& m_Window;
 
 		std::vector<uint8> m_StateBitFields;
 	};

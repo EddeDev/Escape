@@ -24,7 +24,7 @@ namespace esc {
 	class Mouse : public ReferenceCounted
 	{
 	public:
-		Mouse(Ref<Window> window);
+		Mouse(Ref<Window>& window);
 		virtual ~Mouse() {}
 
 		void Update();
@@ -36,7 +36,7 @@ namespace esc {
 		void OnMouseButtonPress(int32 button);
 		void OnMouseButtonRelease(int32 button);
 	private:
-		Ref<Window> m_Window;
+		Ref<Window>& m_Window;
 
 		std::vector<uint8> m_StateBitFields;
 	};

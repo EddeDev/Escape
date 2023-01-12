@@ -1,53 +1,109 @@
 #include "ClientPCH.h"
 #include "Client.h"
 
-namespace esc {
+#include "Core/Packet.h"
 
-	static const uint32 s_DataBufferSize = 4096;
+namespace esc {
 
 	Client::Client(const ClientCreateInfo& createInfo)
 		: m_CreateInfo(createInfo)
 	{
-		m_TCP = new TCP();
+		if (enet_initialize() != 0)
+		{
+			std::cerr << "Unable to initialize ENet!" << std::endl;
+			__debugbreak();
+			return;
+		}
+
+		m_Client = enet_host_create(nullptr, 1, 2, 0, 0);
+		if (!m_Client)
+		{
+			std::cerr << "Failed to create ENet client!" << std::endl;
+			__debugbreak();
+			return;
+		}
+
+		ENetAddress address;
+		enet_address_set_host(&address, createInfo.Address.c_str());
+		address.port = createInfo.Port;
+
+		m_Peer = enet_host_connect(m_Client, &address, 2, 0);
+		if (!m_Peer)
+		{
+			std::cerr << "enet_host_connect failed" << std::endl;
+			__debugbreak();
+			return;
+		}
+
+		ENetEvent event = {};
+		switch (enet_host_service(m_Client, &event, 5000))
+		{
+		case ENET_EVENT_TYPE_CONNECT:
+		{
+			std::cout << "Connection to " << createInfo.Address << ":" << createInfo.Port << " succeeded." << std::endl;
+			break;
+		}
+		case ENET_EVENT_TYPE_DISCONNECT:
+		{
+			std::cout << "Connection to " << createInfo.Address << ":" << createInfo.Port << " failed." << std::endl;
+			__debugbreak();
+			break;
+		}
+		}
+
+		char usernameData[80] = "2|";
+		strcat(usernameData, createInfo.Username.c_str());
+		ENetPacket* packet = enet_packet_create(usernameData, strlen(usernameData) + 1, ENET_PACKET_FLAG_RELIABLE);
+		enet_peer_send(m_Peer, 0, packet);
 	}
 
 	Client::~Client()
 	{
-		delete m_TCP;
+		enet_deinitialize();
 	}
 
-	void TCP::Connect()
+	void Client::Update()
 	{
-		m_Socket = Ref<TcpClient>::Create();
-		m_Socket->SetReceiveBufferSize(s_DataBufferSize);
-		m_Socket->SetSendBufferSize(s_DataBufferSize);
-
-		m_ReceiveBuffer = new uint8[s_DataBufferSize];
-		memset(m_ReceiveBuffer, 0, s_DataBufferSize);
-		m_Socket->BeginConnect(Client::Get().GetCreateInfo().Address, Client::Get().GetCreateInfo().Port, ESCAPE_BIND_CALLBACK(ConnectCallback, this), &m_Socket);
+		ENetEvent event = {};
+		while (enet_host_service(m_Client, &event, 0) > 0)
+		{
+			switch (event.type)
+			{
+			case ENET_EVENT_TYPE_RECEIVE:
+			{
+				ParsePacketData(event.packet->data);
+				enet_packet_destroy(event.packet);
+				break;
+			}
+			}
+		}
 	}
 
-	void TCP::ConnectCallback(const AsyncResult& result)
+	void Client::ParsePacketData(uint8* data)
 	{
-		m_Socket->EndConnect(result);
+		PacketType type;
+		int32 id;
+		sscanf((const char*)data, "%d|%d", &type, &id);
 
-		if (!m_Socket->IsConnected())
-			return;
-
-		m_Stream = m_Socket->GetStream();
-		m_Stream->BeginRead(m_ReceiveBuffer, 0, s_DataBufferSize, ESCAPE_BIND_CALLBACK(ReceiveCallback, this), nullptr);
-	}
-
-	void TCP::ReceiveCallback(const AsyncResult& result)
-	{
-		int32 bufferSize = m_Stream->EndRead(result);
-		if (bufferSize <= 0)
-			return;
-
-		uint8* buffer = new uint8[bufferSize];
-		memcpy(buffer, m_ReceiveBuffer, bufferSize);
-
-		m_Stream->BeginRead(m_ReceiveBuffer, 0, s_DataBufferSize, ESCAPE_BIND_CALLBACK(ReceiveCallback, this), nullptr);
+		switch (type)
+		{
+		case PacketType::Username:
+		{
+			if (id != m_ID)
+			{
+				char username[80];
+				sscanf((const char*)data, "%*d|%*d|%[^|]", &username);
+				m_ClientData[id].ID = id;
+				m_ClientData[id].Username = username;
+			}
+			break;
+		}
+		case PacketType::ID:
+		{
+			m_ID = id;
+			break;
+		}
+		}
 	}
 
 }

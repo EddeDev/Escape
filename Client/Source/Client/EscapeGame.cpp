@@ -11,14 +11,14 @@
 
 namespace esc {
 
-	EscapeGame::EscapeGame(const std::string& address, uint16 port)
+	EscapeGame::EscapeGame(const std::string& address, uint16 port, const std::string& username)
 	{
 		s_Instance = this;
 
 		WindowCreateInfo windowCreateInfo;
 		windowCreateInfo.Width = 1280;
 		windowCreateInfo.Height = 720;
-		windowCreateInfo.Fullscreen = true;
+		windowCreateInfo.Fullscreen = false;
 		windowCreateInfo.Title = "Escape";
 
 		m_Window = Ref<Window>::Create(windowCreateInfo);
@@ -28,6 +28,13 @@ namespace esc {
 		m_Keyboard = Ref<Keyboard>::Create(m_Window);
 		m_Mouse = Ref<Mouse>::Create(m_Window);
 		m_Gamepad = Ref<Gamepad>::Create(m_Window);
+
+		ClientCreateInfo clientCreateInfo;
+		clientCreateInfo.Address = address;
+		clientCreateInfo.Port = port;
+		clientCreateInfo.Username = username;
+
+		m_Client = Ref<Client>::Create(clientCreateInfo);
 	}
 
 	EscapeGame::~EscapeGame()
@@ -114,7 +121,7 @@ namespace esc {
 			frames++;
 			while (time >= lastFrameTime + 1.0f)
 			{
-				std::cout << frames << " fps" << std::endl;
+				// std::cout << frames << " fps" << std::endl;
 				lastFrameTime += 1.0f;
 				frames = 0;
 			}
@@ -174,7 +181,7 @@ namespace esc {
 
 	void EscapeGame::OnUpdate(float deltaTime)
 	{
-		
+		m_Client->Update();
 	}
 
 	void EscapeGame::OnFixedUpdate()
@@ -206,6 +213,32 @@ namespace esc {
 				m_PlayerEntity->SetLinearVelocity({ 0.0f, jumpForce });
 			}
 		}
+
+		struct TransformUpdate
+		{
+			uint32 ID;
+			glm::vec2 Position;
+			float Angle;
+			glm::vec2 Scale;
+
+			bool operator==(const TransformUpdate& other) const
+			{
+				return Position == other.Position && Angle == other.Angle && Scale == other.Scale;
+			}
+		};
+
+		static TransformUpdate lastUpdate;
+
+		TransformUpdate update;
+		update.ID = 10;
+		update.Position = m_PlayerEntity->GetPosition();
+		update.Angle = m_PlayerEntity->GetAngle();
+		update.Scale = m_PlayerEntity->GetScale();
+
+		// if (update != lastUpdate)
+			// m_Client->SendPacket(update);
+
+		lastUpdate = update;
 	}
 
 #define GAMEPAD_AXIS_OFFSET 0.1

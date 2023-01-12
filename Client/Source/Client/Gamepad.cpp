@@ -5,7 +5,7 @@
 
 namespace esc {
 
-	Gamepad::Gamepad(Ref<Window> window)
+	Gamepad::Gamepad(Ref<Window>& window)
 		: m_Window(window)
 	{
 		s_Instance = this;

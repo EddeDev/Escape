@@ -43,7 +43,7 @@ namespace esc {
 	class Gamepad : public ReferenceCounted
 	{
 	public:
-		Gamepad(Ref<Window> window);
+		Gamepad(Ref<Window>& window);
 		virtual ~Gamepad() {}
 
 		void Update();
@@ -59,7 +59,7 @@ namespace esc {
 	private:
 		inline static Gamepad* s_Instance = nullptr;
 
-		Ref<Window> m_Window;
+		Ref<Window>& m_Window;
 	
 		int32 m_SelectedJoystickID = -1;
 	};
