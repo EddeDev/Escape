@@ -1,8 +1,6 @@
 #include "ClientPCH.h"
 #include "Entity.h"
 
-#include "EscapeGame.h"
-
 #include <glm/gtx/vector_angle.hpp>
 
 namespace esc {
@@ -10,21 +8,23 @@ namespace esc {
 	Entity::Entity(const EntityCreateInfo& createInfo)
 		: m_Scale(createInfo.Scale), m_Color(createInfo.Color), m_DebugName(createInfo.DebugName)
 	{
-		b2World& world = EscapeGame::Get().GetPhysicsWorld();
-
 		b2BodyDef bodyDef;
-		bodyDef.type = createInfo.IsDynamic ? b2_dynamicBody : b2_staticBody;
+		if (createInfo.IsKinematic)
+			bodyDef.type = b2_kinematicBody;
+		else
+			bodyDef.type = createInfo.IsDynamic ? b2_dynamicBody : b2_staticBody;
 		bodyDef.position.Set(createInfo.Position.x, createInfo.Position.y);
 		bodyDef.angle = createInfo.Angle;
 		bodyDef.userData.pointer = (uintptr_t)m_DebugName;
 		bodyDef.fixedRotation = createInfo.FixedRotation;
 		bodyDef.allowSleep = createInfo.AllowSleep;
-		m_Body = world.CreateBody(&bodyDef);
+		m_Body = createInfo.World->CreateBody(&bodyDef);
 
-		m_Shape.SetAsBox(createInfo.Scale.x * 0.5f, createInfo.Scale.y * 0.5f);
+		b2PolygonShape shape;
+		shape.SetAsBox(createInfo.Scale.x * 0.5f, createInfo.Scale.y * 0.5f);
 
 		b2FixtureDef fixtureDef;
-		fixtureDef.shape = &m_Shape;
+		fixtureDef.shape = &shape;
 		fixtureDef.density = createInfo.Density;
 		fixtureDef.friction = createInfo.Friction;
 		fixtureDef.restitution = createInfo.Restitution;

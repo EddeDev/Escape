@@ -4,21 +4,8 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Gamepad.h"
-
-#include "Shader.h"
-#include "GraphicsPipeline.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "UniformBuffer.h"
-
-#include "Renderer.h"
-
-#include "Camera.h"
-#include "Entity.h"
-
 #include "Client.h"
-
-#include <box2d/b2_world.h>
+#include "Level.h"
 
 namespace esc {
 
@@ -26,20 +13,17 @@ namespace esc {
 	{
 	public:
 		EscapeGame(const std::string& address, uint16 port, const std::string& username);
-		~EscapeGame();
 
 		void Run();
 
-		b2World& GetPhysicsWorld() const { return *m_PhysicsWorld; }
+		Ref<Window> GetWindow() const { return m_Window; }
+		Ref<Keyboard> GetKeyboard() const { return m_Keyboard; }
+		Ref<Mouse> GetMouse() const { return m_Mouse; }
+		Ref<Gamepad> GetGamepad() const { return m_Gamepad; }
+		Ref<Client> GetClient() const { return m_Client; }
 
 		static EscapeGame& Get() { return *s_Instance; }
 	private:
-		void OnUpdate(float deltaTime);
-		void OnFixedUpdate();
-
-		float GetHorizontalAxis(bool right = false) const;
-		float GetVerticalAxis(bool right = false, bool gamepadInvert = false) const;
-
 		void OnWindowClose();
 		void OnWindowResize(int32 width, int32 height);
 	private:
@@ -49,24 +33,10 @@ namespace esc {
 		Ref<Keyboard> m_Keyboard;
 		Ref<Mouse> m_Mouse;
 		Ref<Gamepad> m_Gamepad;
-		Ref<Renderer> m_Renderer;
+		Ref<Client> m_Client;
 		bool m_Running = true;
 
-		Ref<Client> m_Client;
-
-		b2World* m_PhysicsWorld = nullptr;
-		float m_Accumulator = 0.0f;
-		float m_FixedTimestep = 1.0f / 100.0f;
-		uint32 m_NumSubSteps = 0;
-		uint32 m_MaxSubSteps = 8;
-
-		std::vector<Ref<Entity>> m_Entities;
-		Ref<Entity> m_GroundEntity;
-		Ref<Entity> m_ObstacleEntity;
-		Ref<Entity> m_Obstacle2Entity;
-		Ref<Entity> m_PlayerEntity;
-
-		Camera m_Camera;
+		Ref<Level> m_Level;
 	};
 
 }

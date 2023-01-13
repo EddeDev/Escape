@@ -4,6 +4,7 @@
 #include <box2d/b2_polygon_shape.h>
 #include <box2d/b2_fixture.h>
 #include <box2d/b2_contact.h>
+#include <box2d/b2_world.h>
 
 #include <glm/glm.hpp>
 
@@ -11,12 +12,15 @@ namespace esc {
 
 	struct EntityCreateInfo
 	{
+		b2World* World = nullptr;
+
 		glm::vec2 Position = glm::vec2(0.0f);
 		glm::vec2 Scale = glm::vec2(1.0f);
 		float Angle = 0.0f;
 		float FixedRotation = false;
 
 		bool IsDynamic = false;
+		bool IsKinematic = false;
 		float AllowSleep = true;
 		float Density = 1.0f;
 		float Friction = 0.5f;
@@ -44,7 +48,7 @@ namespace esc {
 		void SetPosition(const glm::vec2& position) { m_Body->SetTransform({ position.x, position.y }, m_Body->GetAngle()); }
 
 		glm::vec2 GetScale() const { return m_Scale; }
-		void SetScale(const glm::vec2& scale) { m_Scale = scale; m_Shape.SetAsBox(m_Scale.x, m_Scale.y); }
+		void SetScale(const glm::vec2& scale) { m_Scale = scale; ((b2PolygonShape*)m_Fixture->GetShape())->SetAsBox(m_Scale.x * 0.5f, m_Scale.y * 0.5f); }
 
 		float GetAngle() const { return m_Body->GetAngle(); }
 		void SetAngle(float angle) { m_Body->SetTransform(m_Body->GetPosition(), m_Body->GetAngle()); }
@@ -54,8 +58,6 @@ namespace esc {
 	private:
 		b2Body* m_Body = nullptr;
 		b2Fixture* m_Fixture = nullptr;
-
-		b2PolygonShape m_Shape;
 
 		const char* m_DebugName;
 		glm::vec2 m_Scale = glm::vec2(1.0f);
