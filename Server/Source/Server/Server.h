@@ -30,6 +30,7 @@ namespace esc {
 
 		struct ClientData
 		{
+			int32 ID = -1;
 			ENetPeer* Peer = nullptr;
 			std::string Username = "";
 		};

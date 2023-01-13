@@ -15,6 +15,7 @@ namespace esc {
 		// Initialize client map
 		for (uint32 i = 1; i <= createInfo.MaxPlayers; i++)
 		{
+			m_Clients[i].ID = i;
 			m_Clients[i].Peer = nullptr;
 			m_Clients[i].Username = "";
 		}
@@ -84,18 +85,20 @@ namespace esc {
 			if (m_Clients[i].Peer)
 				continue;
 
-			m_Clients[i].Peer = peer;
-
 			for (auto& [id, data] : m_Clients)
 			{
-				char sendData[1024] = { '\0' };
-				sprintf(sendData, "2|%d|%s", id, data.Username.c_str());
+				if (data.Peer)
+				{
+					char sendData[1024] = { '\0' };
+					sprintf(sendData, "2|%d|%s", id, data.Username.c_str());
 
-				ENetPacket* packet = enet_packet_create(sendData, strlen(sendData) + 1, ENET_PACKET_FLAG_RELIABLE);
-				enet_host_broadcast(m_Server, 0, packet);
+					ENetPacket* packet = enet_packet_create(sendData, strlen(sendData) + 1, ENET_PACKET_FLAG_RELIABLE);
+					enet_host_broadcast(m_Server, 0, packet);
+				}
 			}
 
-			peer->data = &i;
+			m_Clients[i].Peer = peer;
+			peer->data = &m_Clients[i].ID;
 
 			char data[126] = { '\0' };
 			sprintf(data, "3|%d", i);
@@ -112,6 +115,8 @@ namespace esc {
 		{
 			if (m_Clients[i].Peer == peer)
 			{
+				std::cout << m_Clients[i].Username << " left the server!" << std::endl;
+
 				m_Clients[i].Peer = nullptr;
 				m_Clients[i].Username = "";
 				break;
@@ -153,6 +158,35 @@ namespace esc {
 			enet_address_get_host_ip(&address, ipAddressName.data(), ipAddressName.size());
 
 			std::cout << username << " joined the server! (" << ipAddressName.data() << ":" << address.port << ")" << std::endl;
+
+			break;
+		}
+		case PacketType::TransformUpdate:
+		{
+			struct TransformUpdate
+			{
+				float PositionX;
+				float PositionY;
+				float Angle;
+				float ScaleX;
+				float ScaleY;
+			};
+
+			TransformUpdate& update = *(TransformUpdate*)((uint8*)data + 2);
+
+			char sendData[8] = { '\0' };
+			sprintf(sendData, "4|%d|", id);
+
+			size_t length = strlen(sendData);
+
+			uint32 bufferSize = length + sizeof(TransformUpdate);
+			uint8* buffer = new uint8[bufferSize];
+			for (size_t i = 0; i < length; i++)
+				buffer[i] = sendData[i];
+			memcpy(&buffer[length], &update, sizeof(TransformUpdate));
+
+			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
+			enet_host_broadcast(m_Server, 0, packet);
 
 			break;
 		}

@@ -89,9 +89,10 @@ namespace esc {
 		{
 		case PacketType::Username:
 		{
-			if (id != m_ID)
+			if (id != m_LocalID)
 			{
 				char username[80];
+				memset(username, 0, 80);
 				sscanf((const char*)data, "%*d|%*d|%[^|]", &username);
 				m_ClientData[id].ID = id;
 				m_ClientData[id].Username = username;
@@ -100,7 +101,13 @@ namespace esc {
 		}
 		case PacketType::ID:
 		{
-			m_ID = id;
+			m_LocalID = id;
+			break;
+		}
+		case PacketType::TransformUpdate:
+		{
+			if (id != m_LocalID)
+				m_ClientData[id].Transform = *(TransformUpdate*)((uint8*)data + 4);
 			break;
 		}
 		}

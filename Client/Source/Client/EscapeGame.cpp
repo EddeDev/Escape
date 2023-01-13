@@ -173,6 +173,11 @@ namespace esc {
 				m_Renderer->RenderQuad(position, angle, scale, color);
 			}
 
+			for (auto& [id, data] : m_Client->GetClientData())
+			{
+				m_Renderer->RenderQuad({ data.Transform.PositionX, data.Transform.PositionY, 0.0f }, data.Transform.Angle, {data.Transform.ScaleX, data.Transform.ScaleY, 1.0f}, {0.2f, 0.2f, 0.8f, 1.0f});
+			}
+
 			m_Renderer->EndScene();
 
 			m_Window->SwapBuffers();
@@ -214,29 +219,22 @@ namespace esc {
 			}
 		}
 
-		struct TransformUpdate
-		{
-			uint32 ID;
-			glm::vec2 Position;
-			float Angle;
-			glm::vec2 Scale;
-
-			bool operator==(const TransformUpdate& other) const
-			{
-				return Position == other.Position && Angle == other.Angle && Scale == other.Scale;
-			}
-		};
-
 		static TransformUpdate lastUpdate;
 
-		TransformUpdate update;
-		update.ID = 10;
-		update.Position = m_PlayerEntity->GetPosition();
+		TransformUpdate update = {};
+		update.PositionX = m_PlayerEntity->GetPosition().x;
+		update.PositionY = m_PlayerEntity->GetPosition().y;
 		update.Angle = m_PlayerEntity->GetAngle();
-		update.Scale = m_PlayerEntity->GetScale();
+		update.ScaleX = m_PlayerEntity->GetScale().x;
+		update.ScaleY = m_PlayerEntity->GetScale().y;
 
-		// if (update != lastUpdate)
-			// m_Client->SendPacket(update);
+		static int updates = 0;
+		if (update != lastUpdate)
+		{
+			std::cout << "update " << updates << std::endl;
+			m_Client->SendPacket(PacketType::TransformUpdate, update);
+			updates++;
+		}
 
 		lastUpdate = update;
 	}
