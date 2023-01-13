@@ -18,7 +18,7 @@ namespace esc {
 	{
 		int32 ID = -1;
 		std::string Username = "";
-		TransformUpdate Transform;
+		TransformUpdatePacket LastTransformPacket;
 	};
 
 	class Client : public ReferenceCounted
@@ -35,15 +35,14 @@ namespace esc {
 			if (!m_IsConnected)
 				return;
 
-			uint32 bufferSize = sizeof(T) + 2;
+			PacketHeader header;
+			header.ID = m_LocalID;
+			header.Type = type;
 
+			uint32 bufferSize = sizeof(PacketHeader) + sizeof(T);
 			uint8* buffer = new uint8[bufferSize];
-			memset(buffer, 0, bufferSize);
-
-			std::string typeStr = std::to_string((uint32)type);
-			buffer[0] = typeStr[0];
-			buffer[1] = char('|');
-			memcpy(&buffer[2], &data, sizeof(T));
+			memcpy(buffer, &header, sizeof(PacketHeader));
+			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &data, sizeof(T));
 
 			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
 			enet_peer_send(m_Peer, 0, packet);

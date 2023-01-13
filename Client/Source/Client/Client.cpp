@@ -49,10 +49,12 @@ namespace esc {
 			return;
 		}
 
-		char usernameData[80] = "2|";
-		strcat(usernameData, createInfo.Username.c_str());
-		ENetPacket* packet = enet_packet_create(usernameData, strlen(usernameData) + 1, ENET_PACKET_FLAG_RELIABLE);
-		enet_peer_send(m_Peer, 0, packet);
+		// Send username packet
+		{
+			UsernamePacket usernamePacket;
+			strncpy_s(usernamePacket.Username, createInfo.Username.c_str(), createInfo.Username.size());
+			SendPacket(PacketType::Username, usernamePacket);
+		}
 	}
 
 	Client::~Client()
@@ -82,36 +84,37 @@ namespace esc {
 
 	void Client::ParsePacketData(uint8* data)
 	{
-		if (m_IsConnected)
-			__debugbreak();
+		PacketHeader header;
+		memcpy(&header, data, sizeof(PacketHeader));
 
-		PacketType type;
-		int32 id;
-		sscanf((const char*)data, "%d|%d", &type, &id);
+		if (header.Type == PacketType::ID)
+		{
+			m_LocalID = header.ID;
+			return;
+		}
 
-		switch (type)
+		if (header.ID == m_LocalID)
+			return;
+
+		switch (header.Type)
 		{
 		case PacketType::Username:
 		{
-			if (id != m_LocalID)
-			{
-				char username[80];
-				memset(username, 0, 80);
-				sscanf((const char*)data, "%*d|%*d|%[^|]", &username);
-				m_ClientData[id].ID = id;
-				m_ClientData[id].Username = username;
-			}
-			break;
-		}
-		case PacketType::ID:
-		{
-			m_LocalID = id;
+			UsernamePacket packet;
+			memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(UsernamePacket));
+
+			auto& clientData = m_ClientData[header.ID];
+			clientData.ID = header.ID;
+			clientData.Username = packet.Username;
 			break;
 		}
 		case PacketType::TransformUpdate:
 		{
-			if (id != m_LocalID)
-				m_ClientData[id].Transform = *(TransformUpdate*)((uint8*)data + 4);
+			TransformUpdatePacket packet;
+			memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(TransformUpdatePacket));
+
+			auto& clientData = m_ClientData[header.ID];
+			clientData.LastTransformPacket = packet;
 			break;
 		}
 		}

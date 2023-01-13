@@ -89,21 +89,47 @@ namespace esc {
 			{
 				if (data.Peer)
 				{
-					char sendData[1024] = { '\0' };
-					sprintf(sendData, "2|%d|%s", id, data.Username.c_str());
+					PacketHeader header;
+					header.ID = id;
+					header.Type = PacketType::Username;
 
-					ENetPacket* packet = enet_packet_create(sendData, strlen(sendData) + 1, ENET_PACKET_FLAG_RELIABLE);
+					UsernamePacket usernamePacket;
+					strncpy_s(usernamePacket.Username, data.Username.c_str(), data.Username.size());
+
+					uint32 bufferSize = sizeof(PacketHeader) + sizeof(UsernamePacket);
+					uint8* buffer = new uint8[bufferSize];
+					memcpy(buffer, &header, sizeof(PacketHeader));
+					memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &usernamePacket, sizeof(UsernamePacket));
+
+					ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
 					enet_host_broadcast(m_Server, 0, packet);
+
+					delete[] buffer;
 				}
 			}
 
-			m_Clients[i].Peer = peer;
 			peer->data = &m_Clients[i].ID;
+			m_Clients[i].Peer = peer;
 
-			char data[126] = { '\0' };
-			sprintf(data, "3|%d", i);
-			ENetPacket* packet = enet_packet_create(data, strlen(data) + 1, ENET_PACKET_FLAG_RELIABLE);
-			enet_peer_send(peer, 0, packet);
+			// Send ID packet
+			{
+				PacketHeader header;
+				header.ID = i;
+				header.Type = PacketType::ID;
+
+				IDPacket idPacket;
+				idPacket.ID = i;
+
+				uint32 bufferSize = sizeof(PacketHeader) + sizeof(IDPacket);
+				uint8* buffer = new uint8[bufferSize];
+				memcpy(buffer, &header, sizeof(PacketHeader));
+				memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &idPacket, sizeof(IDPacket));
+
+				ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
+				enet_peer_send(peer, 0, packet);
+
+				delete[] buffer;
+			}
 
 			break;
 		}
@@ -134,60 +160,57 @@ namespace esc {
 
 	void Server::ParseData(int32 id, uint8* data)
 	{
-		PacketType type;
-		sscanf((const char*)data, "%d|", &type);
+		PacketHeader header;
+		memcpy(&header, data, sizeof(PacketHeader));
 
-		switch (type)
+		if (header.Type == PacketType::ID)
+		{
+			__debugbreak();
+			return;
+		}
+
+		switch (header.Type)
 		{
 		case PacketType::Username:
 		{
-			char username[80];
-			sscanf((const char*)data, "2|%[^\n]", &username);
+			UsernamePacket usernamePacket;
+			memcpy(&usernamePacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(UsernamePacket));
 
-			char headerData[1024] = { '\0' };
-			sprintf(headerData, "2|%d|%s", id, username);
-
-			ENetPacket* packet = enet_packet_create(headerData, strlen(headerData) + 1, ENET_PACKET_FLAG_RELIABLE);
-			enet_host_broadcast(m_Server, 0, packet);
-
-			m_Clients[id].Username = username;
-
-			auto& address = m_Clients[id].Peer->address;
-
-			std::vector<char> ipAddressName(80);
-			enet_address_get_host_ip(&address, ipAddressName.data(), ipAddressName.size());
-
-			std::cout << username << " joined the server! (" << ipAddressName.data() << ":" << address.port << ")" << std::endl;
-
-			break;
-		}
-		case PacketType::TransformUpdate:
-		{
-			struct TransformUpdate
-			{
-				float PositionX;
-				float PositionY;
-				float Angle;
-				float ScaleX;
-				float ScaleY;
-			};
-
-			TransformUpdate& update = *(TransformUpdate*)((uint8*)data + 2);
-
-			char headerData[8] = { '\0' };
-			sprintf(headerData, "4|%d|", id);
-
-			size_t length = strlen(headerData);
-
-			uint32 bufferSize = length + sizeof(TransformUpdate);
+			uint32 bufferSize = sizeof(PacketHeader) + sizeof(UsernamePacket);
 			uint8* buffer = new uint8[bufferSize];
-			for (size_t i = 0; i < length; i++)
-				buffer[i] = headerData[i];
-			memcpy(&buffer[length], &update, sizeof(TransformUpdate));
+			memcpy(buffer, &header, sizeof(PacketHeader));
+			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &usernamePacket, sizeof(UsernamePacket));
 
 			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
 			enet_host_broadcast(m_Server, 0, packet);
 
+			delete[] buffer;
+
+			m_Clients[id].Username = usernamePacket.Username;
+
+			{
+				auto& address = m_Clients[id].Peer->address;
+				std::vector<char> ipAddressName(80);
+				enet_address_get_host_ip(&address, ipAddressName.data(), ipAddressName.size());
+				std::cout << usernamePacket.Username << " joined the server! (" << ipAddressName.data() << ":" << address.port << ")" << std::endl;
+			}
+			
+			break;
+		}
+		case PacketType::TransformUpdate:
+		{
+			TransformUpdatePacket transformPacket;
+			memcpy(&transformPacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(TransformUpdatePacket));
+
+			uint32 bufferSize = sizeof(PacketHeader) + sizeof(TransformUpdatePacket);
+			uint8* buffer = new uint8[bufferSize];
+			memcpy(buffer, &header, sizeof(PacketHeader));
+			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &transformPacket, sizeof(TransformUpdatePacket));
+
+			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
+			enet_host_broadcast(m_Server, 0, packet);
+
+			delete[] buffer;
 			break;
 		}
 		}

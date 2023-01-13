@@ -176,7 +176,8 @@ namespace esc {
 
 			for (auto& [id, data] : m_Client->GetClientData())
 			{
-				m_Renderer->RenderQuad({ data.Transform.PositionX, data.Transform.PositionY, 0.0f }, data.Transform.Angle, {data.Transform.ScaleX, data.Transform.ScaleY, 1.0f}, {0.2f, 0.2f, 0.8f, 1.0f});
+				auto& transform = data.LastTransformPacket;
+				m_Renderer->RenderQuad({ transform.PositionX, transform.PositionY, 0.0f }, transform.Angle, { transform.ScaleX,transform.ScaleY, 1.0f }, { 0.2f, 0.2f, 0.8f, 1.0f });
 			}
 
 			m_Renderer->EndScene();
@@ -220,9 +221,9 @@ namespace esc {
 			}
 		}
 
-		static TransformUpdate lastUpdate;
+		static TransformUpdatePacket lastUpdate;
 
-		TransformUpdate update = {};
+		TransformUpdatePacket update = {};
 		update.PositionX = m_PlayerEntity->GetPosition().x;
 		update.PositionY = m_PlayerEntity->GetPosition().y;
 		update.Angle = m_PlayerEntity->GetAngle();
