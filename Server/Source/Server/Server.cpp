@@ -15,7 +15,7 @@ namespace esc {
 		// Initialize client map
 		for (uint32 i = 1; i <= createInfo.MaxPlayers; i++)
 		{
-			m_Clients[i].ID = i;
+			m_Clients[i].TempID = i;
 			m_Clients[i].Peer = nullptr;
 			m_Clients[i].Username = "";
 		}
@@ -85,31 +85,8 @@ namespace esc {
 			if (m_Clients[i].Peer)
 				continue;
 
-			for (auto& [id, data] : m_Clients)
-			{
-				if (data.Peer)
-				{
-					PacketHeader header;
-					header.ID = id;
-					header.Type = PacketType::Username;
-
-					UsernamePacket usernamePacket;
-					strncpy_s(usernamePacket.Username, data.Username.c_str(), data.Username.size());
-
-					uint32 bufferSize = sizeof(PacketHeader) + sizeof(UsernamePacket);
-					uint8* buffer = new uint8[bufferSize];
-					memcpy(buffer, &header, sizeof(PacketHeader));
-					memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &usernamePacket, sizeof(UsernamePacket));
-
-					ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
-					enet_host_broadcast(m_Server, 0, packet);
-
-					delete[] buffer;
-				}
-			}
-
-			peer->data = &m_Clients[i].ID;
 			m_Clients[i].Peer = peer;
+			peer->data = &m_Clients[i].TempID;
 
 			// Send ID packet
 			{
@@ -131,6 +108,30 @@ namespace esc {
 				delete[] buffer;
 			}
 
+			// Broadcast Connect packet
+			for (auto& [id, data] : m_Clients)
+			{
+				if (data.Peer)
+				{
+					PacketHeader header;
+					header.ID = id;
+					header.Type = PacketType::Connect;
+
+					ConnectPacket connectPacket;
+					strncpy_s(connectPacket.Username, data.Username.c_str(), data.Username.size());
+
+					uint32 bufferSize = sizeof(PacketHeader) + sizeof(ConnectPacket);
+					uint8* buffer = new uint8[bufferSize];
+					memcpy(buffer, &header, sizeof(PacketHeader));
+					memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &connectPacket, sizeof(ConnectPacket));
+
+					ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
+					enet_host_broadcast(m_Server, 0, packet);
+
+					delete[] buffer;
+				}
+			}
+
 			break;
 		}
 	}
@@ -142,6 +143,26 @@ namespace esc {
 			if (m_Clients[i].Peer == peer)
 			{
 				std::cout << m_Clients[i].Username << " left the server!" << std::endl;
+
+				// Send Disconnect packet
+				{
+					PacketHeader header;
+					header.ID = i;
+					header.Type = PacketType::Disconnect;
+
+					DisconnectPacket disconnectPacket;
+					disconnectPacket.ID = i;
+
+					uint32 bufferSize = sizeof(PacketHeader) + sizeof(DisconnectPacket);
+					uint8* buffer = new uint8[bufferSize];
+					memcpy(buffer, &header, sizeof(PacketHeader));
+					memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &disconnectPacket, sizeof(DisconnectPacket));
+
+					ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
+					enet_host_broadcast(m_Server, 0, packet);
+
+					delete[] buffer;
+				}
 
 				m_Clients[i].Peer = nullptr;
 				m_Clients[i].Username = "";
@@ -163,36 +184,33 @@ namespace esc {
 		PacketHeader header;
 		memcpy(&header, data, sizeof(PacketHeader));
 
-		if (header.Type == PacketType::ID)
-		{
-			__debugbreak();
-			return;
-		}
-
 		switch (header.Type)
 		{
-		case PacketType::Username:
+		case PacketType::Connect:
 		{
-			UsernamePacket usernamePacket;
-			memcpy(&usernamePacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(UsernamePacket));
+			// TODO
+			header.ID = id;
 
-			uint32 bufferSize = sizeof(PacketHeader) + sizeof(UsernamePacket);
+			ConnectPacket connectPacket;
+			memcpy(&connectPacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(ConnectPacket));
+
+			uint32 bufferSize = sizeof(PacketHeader) + sizeof(ConnectPacket);
 			uint8* buffer = new uint8[bufferSize];
 			memcpy(buffer, &header, sizeof(PacketHeader));
-			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &usernamePacket, sizeof(UsernamePacket));
+			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &connectPacket, sizeof(ConnectPacket));
 
 			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
 			enet_host_broadcast(m_Server, 0, packet);
 
 			delete[] buffer;
 
-			m_Clients[id].Username = usernamePacket.Username;
+			m_Clients[id].Username = connectPacket.Username;
 
 			{
 				auto& address = m_Clients[id].Peer->address;
 				std::vector<char> ipAddressName(80);
 				enet_address_get_host_ip(&address, ipAddressName.data(), ipAddressName.size());
-				std::cout << usernamePacket.Username << " joined the server! (" << ipAddressName.data() << ":" << address.port << ")" << std::endl;
+				std::cout << connectPacket.Username << " joined the server! (" << ipAddressName.data() << ":" << address.port << ")" << std::endl;
 			}
 			
 			break;

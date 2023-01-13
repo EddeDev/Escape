@@ -7,9 +7,11 @@ namespace esc {
 	enum class PacketType : uint32
 	{
 		None = 0,
-		Username = 2,
+		Connect = 1,
+		Disconnect = 2,
 		ID = 3,
-		TransformUpdate = 4
+		TransformUpdate = 4,
+		ColorUpdate = 5
 	};
 	
 	struct PacketHeader
@@ -18,14 +20,19 @@ namespace esc {
 		PacketType Type = PacketType::None;
 	};
 
-	struct IDPacket
-	{
-		uint32 ID = 0;
-	};
-
-	struct UsernamePacket
+	struct ConnectPacket
 	{
 		char Username[64] = { '\n' };
+	};
+
+	struct DisconnectPacket
+	{
+		int32 ID = 0;
+	};
+
+	struct IDPacket
+	{
+		int32 ID = 0;
 	};
 
 	struct TransformUpdatePacket
@@ -41,6 +48,20 @@ namespace esc {
 		bool operator==(const TransformUpdatePacket& other) const
 		{
 			return PositionX == other.PositionX && PositionY == other.PositionY && Angle == other.Angle && ScaleX == other.ScaleX && ScaleY == other.ScaleY;
+		}
+	};
+
+	struct ColorUpdatePacket
+	{
+		float ColorR = 0.0f;
+		float ColorG = 0.0f;
+		float ColorB = 0.0f;
+
+		ColorUpdatePacket() = default;
+
+		bool operator==(const ColorUpdatePacket& other)
+		{
+			return ColorR == other.ColorR && ColorG == other.ColorG && ColorB == other.ColorB;
 		}
 	};
 

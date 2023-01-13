@@ -49,16 +49,17 @@ namespace esc {
 			return;
 		}
 
-		// Send username packet
+		// Send connect packet
 		{
-			UsernamePacket usernamePacket;
-			strncpy_s(usernamePacket.Username, createInfo.Username.c_str(), createInfo.Username.size());
-			SendPacket(PacketType::Username, usernamePacket);
+			ConnectPacket connectPacket;
+			strncpy_s(connectPacket.Username, createInfo.Username.c_str(), createInfo.Username.size());
+			SendPacket(PacketType::Connect, connectPacket);
 		}
 	}
 
 	Client::~Client()
 	{
+		enet_peer_disconnect(m_Peer, 0);
 		enet_deinitialize();
 	}
 
@@ -87,34 +88,48 @@ namespace esc {
 		PacketHeader header;
 		memcpy(&header, data, sizeof(PacketHeader));
 
-		if (header.Type == PacketType::ID)
-		{
-			m_LocalID = header.ID;
-			return;
-		}
-
-		if (header.ID == m_LocalID)
-			return;
-
 		switch (header.Type)
 		{
-		case PacketType::Username:
+		case PacketType::ID:
 		{
-			UsernamePacket packet;
-			memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(UsernamePacket));
+			IDPacket packet;
+			memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(IDPacket));
+			m_LocalID = packet.ID;
+			break;
+		}
+		case PacketType::Connect:
+		{
+			if (header.ID != m_LocalID)
+			{
+				ConnectPacket packet;
+				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(ConnectPacket));
 
-			auto& clientData = m_ClientData[header.ID];
-			clientData.ID = header.ID;
-			clientData.Username = packet.Username;
+				auto& clientData = m_ClientData[header.ID];
+				clientData.ID = header.ID;
+				clientData.Username = packet.Username;
+			}
+			break;
+		}
+		case PacketType::Disconnect:
+		{
+			if (header.ID != m_LocalID)
+			{
+				DisconnectPacket packet;
+				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(DisconnectPacket));
+				m_ClientData.erase(packet.ID);
+			}
 			break;
 		}
 		case PacketType::TransformUpdate:
 		{
-			TransformUpdatePacket packet;
-			memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(TransformUpdatePacket));
+			if (header.ID != m_LocalID)
+			{
+				TransformUpdatePacket packet;
+				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(TransformUpdatePacket));
 
-			auto& clientData = m_ClientData[header.ID];
-			clientData.LastTransformPacket = packet;
+				auto& clientData = m_ClientData[header.ID];
+				clientData.LastTransformUpdate = packet;
+			}
 			break;
 		}
 		}

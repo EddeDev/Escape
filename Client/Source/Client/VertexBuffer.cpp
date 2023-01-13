@@ -47,7 +47,7 @@ namespace esc {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	void VertexBuffer::SetData(const void* data, uint32 size, uint32 offset)
+	void VertexBuffer::SetData(const void* data, uint32 size, uint32 offset) const
 	{
 		glNamedBufferSubData(m_BufferID, offset, size, data);
 	}

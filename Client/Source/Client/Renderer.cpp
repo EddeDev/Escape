@@ -54,19 +54,27 @@ namespace esc {
 
 	void Renderer::BeginScene(const Camera& camera)
 	{
-		m_QuadVertexPointer = m_QuadVertexStorage;
-		m_QuadIndexCount = 0;
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
 		m_CameraData.ViewMatrix = camera.ViewMatrix;
 		m_CameraData.ProjectionMatrix = camera.ProjectionMatrix;
 		m_CameraData.ViewProjectionMatrix = camera.ViewProjectionMatrix;
 		m_CameraData.InverseViewProjectionMatrix = camera.InverseViewProjectionMatrix;
 		m_CameraDataUniformBuffer->SetData(&m_CameraData, sizeof(CameraDataUB));
+		
+		StartBatch();
 	}
 
 	void Renderer::EndScene()
 	{
 		FlushQuads();
+	}
+
+	void Renderer::StartBatch()
+	{
+		m_QuadVertexPointer = m_QuadVertexStorage;
+		m_QuadIndexCount = 0;
 	}
 
 	void Renderer::FlushQuads()
@@ -81,20 +89,20 @@ namespace esc {
 			m_QuadIndexBuffer->Bind();
 
 			m_QuadShader->Bind();
-			m_QuadPipeline->DrawIndexed(m_QuadIndexBuffer->GetCount());
+			m_QuadPipeline->DrawIndexed(m_QuadIndexCount);
 		}
-
-		m_QuadVertexPointer = m_QuadVertexStorage;
-		m_QuadIndexCount = 0;
 	}
 
 	void Renderer::RenderQuad(const glm::vec3& position, float angle, const glm::vec3& scale, const glm::vec4& color)
 	{
 		if (m_QuadIndexCount >= s_MaxQuadIndices)
+		{
 			FlushQuads();
+			StartBatch();
+		}
 
-		glm::mat4 transform = 
-			glm::translate(glm::mat4(1.0f), position) * 
+		glm::mat4 transform =
+			glm::translate(glm::mat4(1.0f), position) *
 			glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) *
 			glm::scale(glm::mat4(1.0f), scale);
 

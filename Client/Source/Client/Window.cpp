@@ -75,7 +75,7 @@ namespace esc {
 			if (id == 131185)
 				return;
 			std::cerr << "[OpenGL] " << message << " (" << id << ")" << std::endl;
-			__debugbreak();
+			// __debugbreak();
 		}, this);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif

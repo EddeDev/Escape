@@ -115,9 +115,6 @@ namespace esc {
 
 		while (m_Running)
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-
 			float time = m_Window->GetTime();
 			float deltaTime = time - lastTime;
 			lastTime = time;
@@ -125,7 +122,7 @@ namespace esc {
 			frames++;
 			while (time >= lastFrameTime + 1.0f)
 			{
-				// std::cout << frames << " fps" << std::endl;
+				std::cout << frames << " fps" << std::endl;
 				lastFrameTime += 1.0f;
 				frames = 0;
 			}
@@ -166,7 +163,7 @@ namespace esc {
 
 			for (Ref<Entity> entity : m_Entities)
 			{
-				glm::vec3 position = { entity->GetPosition().x, entity->GetPosition().y, 0.0f };
+				glm::vec3 position = { entity->GetPosition().x, entity->GetPosition().y, -0.2f };
 				float angle = entity->GetAngle();
 				glm::vec3 scale = { entity->GetScale().x, entity->GetScale().y, 1.0f };
 				glm::vec4 color = entity->GetColor();
@@ -174,10 +171,12 @@ namespace esc {
 				m_Renderer->RenderQuad(position, angle, scale, color);
 			}
 
-			for (auto& [id, data] : m_Client->GetClientData())
+			auto& clientData = m_Client->GetClientData();
+			for (const auto& [id, data] : clientData)
 			{
-				auto& transform = data.LastTransformPacket;
-				m_Renderer->RenderQuad({ transform.PositionX, transform.PositionY, 0.0f }, transform.Angle, { transform.ScaleX,transform.ScaleY, 1.0f }, { 0.2f, 0.2f, 0.8f, 1.0f });
+				const auto& transform = data.LastTransformUpdate;
+				const auto& color = data.LastColorUpdate;
+				m_Renderer->RenderQuad({ transform.PositionX, transform.PositionY, -0.2f }, transform.Angle, { transform.ScaleX, transform.ScaleY, 1.0f }, { color.ColorR, color.ColorG, color.ColorB, 1.0f });
 			}
 
 			m_Renderer->EndScene();
@@ -217,7 +216,7 @@ namespace esc {
 			if (m_Keyboard->GetKey(KeyCode::Space) || m_Gamepad->GetButton(GamepadButtonCode::A))
 			{
 				float jumpForce = 5.0f;
-				m_PlayerEntity->SetLinearVelocity({ 0.0f, jumpForce });
+				m_PlayerEntity->SetLinearVelocity({ m_PlayerEntity->GetLinearVelocity().x, jumpForce });
 			}
 		}
 

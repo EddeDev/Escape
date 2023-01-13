@@ -18,6 +18,7 @@ namespace esc {
 		void BeginScene(const Camera& camera);
 		void EndScene();
 
+		void StartBatch();
 		void FlushQuads();
 		void RenderQuad(const glm::vec3& position, float angle = 0.0f, const glm::vec3& scale = glm::vec3(1.0f), const glm::vec4& color = glm::vec4(1.0f));
 

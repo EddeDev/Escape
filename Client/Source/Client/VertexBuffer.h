@@ -18,7 +18,7 @@ namespace esc {
 		void Bind() const;
 		void Unbind() const;
 
-		void SetData(const void* data, uint32 size, uint32 offset = 0);
+		void SetData(const void* data, uint32 size, uint32 offset = 0) const;
 	private:
 		uint32 m_BufferID = 0;
 	};

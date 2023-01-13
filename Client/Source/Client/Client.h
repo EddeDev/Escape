@@ -18,7 +18,8 @@ namespace esc {
 	{
 		int32 ID = -1;
 		std::string Username = "";
-		TransformUpdatePacket LastTransformPacket;
+		TransformUpdatePacket LastTransformUpdate;
+		ColorUpdatePacket LastColorUpdate;
 	};
 
 	class Client : public ReferenceCounted
@@ -50,8 +51,8 @@ namespace esc {
 			delete[] buffer;
 		}
 
-		std::map<uint32, ClientData>& GetClientData() { return m_ClientData; }
-		const std::map<uint32, ClientData>& GetClientData() const { return m_ClientData; }
+		std::map<int32, ClientData>& GetClientData() { return m_ClientData; }
+		const std::map<int32, ClientData>& GetClientData() const { return m_ClientData; }
 	private:
 		void ParsePacketData(uint8* data);
 	private:
@@ -61,7 +62,7 @@ namespace esc {
 		bool m_IsConnected = false;
 
 		int32 m_LocalID = -1;
-		std::map<uint32, ClientData> m_ClientData;
+		std::map<int32, ClientData> m_ClientData;
 	};
 
 }
