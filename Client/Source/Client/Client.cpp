@@ -36,19 +36,17 @@ namespace esc {
 		}
 
 		ENetEvent event = {};
-		switch (enet_host_service(m_Client, &event, 5000))
-		{
-		case ENET_EVENT_TYPE_CONNECT:
+		if (enet_host_service(m_Client, &event, 2000) &&
+			event.type == ENET_EVENT_TYPE_CONNECT)
 		{
 			std::cout << "Connection to " << createInfo.Address << ":" << createInfo.Port << " succeeded." << std::endl;
-			break;
+			m_IsConnected = true;
 		}
-		case ENET_EVENT_TYPE_DISCONNECT:
+		else
 		{
 			std::cout << "Connection to " << createInfo.Address << ":" << createInfo.Port << " failed." << std::endl;
-			__debugbreak();
-			break;
-		}
+			m_IsConnected = false;
+			return;
 		}
 
 		char usernameData[80] = "2|";
@@ -64,6 +62,9 @@ namespace esc {
 
 	void Client::Update()
 	{
+		if (!m_IsConnected)
+			return;
+
 		ENetEvent event = {};
 		while (enet_host_service(m_Client, &event, 0) > 0)
 		{
@@ -81,6 +82,9 @@ namespace esc {
 
 	void Client::ParsePacketData(uint8* data)
 	{
+		if (m_IsConnected)
+			__debugbreak();
+
 		PacketType type;
 		int32 id;
 		sscanf((const char*)data, "%d|%d", &type, &id);

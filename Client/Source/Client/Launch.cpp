@@ -9,7 +9,7 @@ namespace esc {
 	void Run()
 	{
 #ifdef ESCAPE_BUILD_DEBUG
-		_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
 #endif
 
 		std::cout << "Username: ";
@@ -19,10 +19,6 @@ namespace esc {
 		EscapeGame* instance = new EscapeGame(ESCAPE_TEST_ADDRESS, ESCAPE_DEFAULT_PORT, username);
 		instance->Run();
 		delete instance;
-
-#ifdef ESCAPE_BUILD_DEBUG
-		_CrtDumpMemoryLeaks();
-#endif
 	}
 
 }

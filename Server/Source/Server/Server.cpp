@@ -144,10 +144,10 @@ namespace esc {
 			char username[80];
 			sscanf((const char*)data, "2|%[^\n]", &username);
 
-			char sendData[1024] = { '\0' };
-			sprintf(sendData, "2|%d|%s", id, username);
+			char headerData[1024] = { '\0' };
+			sprintf(headerData, "2|%d|%s", id, username);
 
-			ENetPacket* packet = enet_packet_create(sendData, strlen(sendData) + 1, ENET_PACKET_FLAG_RELIABLE);
+			ENetPacket* packet = enet_packet_create(headerData, strlen(headerData) + 1, ENET_PACKET_FLAG_RELIABLE);
 			enet_host_broadcast(m_Server, 0, packet);
 
 			m_Clients[id].Username = username;
@@ -174,15 +174,15 @@ namespace esc {
 
 			TransformUpdate& update = *(TransformUpdate*)((uint8*)data + 2);
 
-			char sendData[8] = { '\0' };
-			sprintf(sendData, "4|%d|", id);
+			char headerData[8] = { '\0' };
+			sprintf(headerData, "4|%d|", id);
 
-			size_t length = strlen(sendData);
+			size_t length = strlen(headerData);
 
 			uint32 bufferSize = length + sizeof(TransformUpdate);
 			uint8* buffer = new uint8[bufferSize];
 			for (size_t i = 0; i < length; i++)
-				buffer[i] = sendData[i];
+				buffer[i] = headerData[i];
 			memcpy(&buffer[length], &update, sizeof(TransformUpdate));
 
 			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);

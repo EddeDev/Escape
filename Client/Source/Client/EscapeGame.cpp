@@ -39,6 +39,7 @@ namespace esc {
 
 	EscapeGame::~EscapeGame()
 	{
+		delete m_PhysicsWorld;
 	}
 
 	void EscapeGame::Run()
@@ -114,6 +115,9 @@ namespace esc {
 
 		while (m_Running)
 		{
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+
 			float time = m_Window->GetTime();
 			float deltaTime = time - lastTime;
 			lastTime = time;
@@ -157,9 +161,6 @@ namespace esc {
 
 			m_Keyboard->Update();
 			m_Mouse->Update();
-
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
 			m_Renderer->BeginScene(m_Camera);
 
@@ -231,7 +232,7 @@ namespace esc {
 		static int updates = 0;
 		if (update != lastUpdate)
 		{
-			std::cout << "update " << updates << std::endl;
+			// std::cout << "update " << updates << std::endl;
 			m_Client->SendPacket(PacketType::TransformUpdate, update);
 			updates++;
 		}
