@@ -13,7 +13,7 @@ namespace esc {
 		Input = 4,
 		LevelData = 5,
 		TransformUpdate = 6,
-		ColorUpdate = 7
+		PlayerUpdate = 7
 	};
 	
 	struct PacketHeader
@@ -82,17 +82,21 @@ namespace esc {
 		}
 	};
 
-	struct ColorUpdatePacket
+	struct PlayerUpdatePacket
 	{
+		char TexturePath[128] = { '\n' };
 		float ColorR = 0.0f;
 		float ColorG = 0.0f;
 		float ColorB = 0.0f;
 
-		ColorUpdatePacket() = default;
+		PlayerUpdatePacket() = default;
 
-		bool operator==(const ColorUpdatePacket& other)
+		bool operator==(const PlayerUpdatePacket& other) const
 		{
-			return ColorR == other.ColorR && ColorG == other.ColorG && ColorB == other.ColorB;
+			return strcmp(TexturePath, other.TexturePath) == 0 &&
+				ColorR == other.ColorR && 
+				ColorG == other.ColorG && 
+				ColorB == other.ColorB;
 		}
 	};
 

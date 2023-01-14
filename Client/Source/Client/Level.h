@@ -5,8 +5,10 @@
 #include "Entity.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "Chunk.h"
 
 #include <box2d/b2_world.h>
+#include <box2d/b2_draw.h>
 
 namespace esc {
 
@@ -43,15 +45,16 @@ namespace esc {
 
 		std::vector<Ref<Entity>> m_Entities;
 		std::unordered_map<int32, Ref<Entity>> m_ClientPlayerEntities;
-		Ref<Entity> m_GroundEntity;
-		Ref<Entity> m_ObstacleEntity;
-		Ref<Entity> m_Obstacle2Entity;
 		Ref<Entity> m_PlayerEntity;
+
+		Ref<Texture> m_CloudTexture;
 		
 		Camera m_Camera;
 
 		InputPacket m_LastInputPacket;
 		TransformUpdatePacket m_LastTransformUpdate;
+		PlayerUpdatePacket m_LastPlayerUpdate;
+		bool m_SendPackets = false;
 	};
 
 }

@@ -60,7 +60,9 @@ project "Client"
 
         "%{prj.name}/Libraries/glm/glm/**.h",
         "%{prj.name}/Libraries/glm/glm/**.hpp",
-        "%{prj.name}/Libraries/glm/glm/**.inl"
+        "%{prj.name}/Libraries/glm/glm/**.inl",
+
+        "%{prj.name}/Libraries/stb_image/stb_image.h"
     }
 
     includedirs
@@ -73,6 +75,7 @@ project "Client"
         "%{prj.name}/Libraries/Glad/include",
         "%{prj.name}/Libraries/Box2D/include",
         "%{prj.name}/Libraries/glm",
+        "%{prj.name}/Libraries/stb_image"
     }
 
     links

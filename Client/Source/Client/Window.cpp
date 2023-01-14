@@ -72,10 +72,10 @@ namespace esc {
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback([](uint32 source, uint32 type, uint32 id, uint32 severity, int32 length, const char* message, const void* userParam)
 		{
-			if (id == 131185)
+			if (id == 131185 || id == 131204)
 				return;
 			std::cerr << "[OpenGL] " << message << " (" << id << ")" << std::endl;
-			// __debugbreak();
+			__debugbreak();
 		}, this);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif

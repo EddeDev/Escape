@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Texture.h"
+#include "Chunk.h"
+
 #include <box2d/b2_body.h>
 #include <box2d/b2_polygon_shape.h>
 #include <box2d/b2_fixture.h>
@@ -28,6 +31,8 @@ namespace esc {
 		float RestitutionThreshold = 0.5f;
 
 		glm::vec4 Color = glm::vec4(1.0f);
+		Ref<Texture> Texture;
+		ChunkSpecification* ChunkSpec = nullptr;
 
 		const char* DebugName = "Unnamed Entity";
 	};
@@ -55,13 +60,23 @@ namespace esc {
 
 		glm::vec4 GetColor() const { return m_Color; }
 		void SetColor(const glm::vec4& color) { m_Color = color; }
+
+		Ref<Texture> GetTexture() const { return m_Texture; }
+		void SetTexture(Ref<Texture> texture) { m_Texture = texture; }
+
+		bool IsChunk() const { return m_IsChunk; }
+		const std::unordered_map<TileType, Ref<Texture>>& GetChunkTextures() const { return m_ChunkTextures; }
 	private:
 		b2Body* m_Body = nullptr;
 		b2Fixture* m_Fixture = nullptr;
 
-		const char* m_DebugName;
+		const char* m_DebugName = "Unnamed Entity";
 		glm::vec2 m_Scale = glm::vec2(1.0f);
 		glm::vec4 m_Color = glm::vec4(1.0f);
+		Ref<Texture> m_Texture;
+
+		bool m_IsChunk = false;
+		std::unordered_map<TileType, Ref<Texture>> m_ChunkTextures;
 	};
 
 }

@@ -107,6 +107,9 @@ namespace esc {
 				auto& clientData = m_ClientData[header.ID];
 				clientData.ID = header.ID;
 				clientData.Username = packet.Username;
+
+				for (auto& callback : m_ClientConnectCallbacks)
+					callback(clientData.ID);
 			}
 			break;
 		}
@@ -141,6 +144,18 @@ namespace esc {
 
 				auto& clientData = m_ClientData[header.ID];
 				clientData.LastTransformUpdate = packet;
+			}
+			break;
+		}
+		case PacketType::PlayerUpdate:
+		{
+			if (header.ID != m_LocalID)
+			{
+				PlayerUpdatePacket packet;
+				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(PlayerUpdatePacket));
+
+				auto& clientData = m_ClientData[header.ID];
+				clientData.LastPlayerUpdate = packet;
 			}
 			break;
 		}

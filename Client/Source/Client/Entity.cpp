@@ -6,11 +6,25 @@
 namespace esc {
 
 	Entity::Entity(const EntityCreateInfo& createInfo)
-		: m_Scale(createInfo.Scale), m_Color(createInfo.Color), m_DebugName(createInfo.DebugName)
+		: m_Scale(createInfo.Scale), 
+		m_Color(createInfo.Color), 
+		m_Texture(createInfo.Texture), 
+		m_DebugName(createInfo.DebugName),
+		m_IsChunk(createInfo.ChunkSpec)
 	{
 		if (!createInfo.World)
 			__debugbreak();
 
+		if (m_IsChunk)
+		{
+			for (auto& [type, texturePath] : createInfo.ChunkSpec->Mapping)
+			{
+				TextureInfo textureInfo;
+				textureInfo.Filepath = texturePath;
+				m_ChunkTextures[type] = Ref<Texture>::Create(textureInfo);
+			}
+		}
+		
 		b2BodyDef bodyDef;
 		if (createInfo.IsKinematic)
 			bodyDef.type = b2_kinematicBody;

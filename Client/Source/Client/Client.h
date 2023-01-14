@@ -20,7 +20,7 @@ namespace esc {
 		std::string Username = "";
 		InputPacket LastInputUpdate;
 		TransformUpdatePacket LastTransformUpdate;
-		ColorUpdatePacket LastColorUpdate;
+		PlayerUpdatePacket LastPlayerUpdate;
 	};
 
 	class Client : public ReferenceCounted
@@ -52,6 +52,8 @@ namespace esc {
 			delete[] buffer;
 		}
 
+		void AddClientConnectCallback(const std::function<void(int32)>& callback) { m_ClientConnectCallbacks.push_back(callback); }
+
 		std::map<int32, ClientData>& GetClientData() { return m_ClientData; }
 		const std::map<int32, ClientData>& GetClientData() const { return m_ClientData; }
 	private:
@@ -64,6 +66,7 @@ namespace esc {
 
 		int32 m_LocalID = -1;
 		std::map<int32, ClientData> m_ClientData;
+		std::vector<std::function<void(int32)>> m_ClientConnectCallbacks;
 	};
 
 }

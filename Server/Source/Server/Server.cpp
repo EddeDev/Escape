@@ -247,6 +247,22 @@ namespace esc {
 			delete[] buffer;
 			break;
 		}
+		case PacketType::PlayerUpdate:
+		{
+			PlayerUpdatePacket playerUpdatePacket;
+			memcpy(&playerUpdatePacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(PlayerUpdatePacket));
+
+			uint32 bufferSize = sizeof(PacketHeader) + sizeof(PlayerUpdatePacket);
+			uint8* buffer = new uint8[bufferSize];
+			memcpy(buffer, &header, sizeof(PacketHeader));
+			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &playerUpdatePacket, sizeof(PlayerUpdatePacket));
+
+			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
+			enet_host_broadcast(m_Server, 0, packet);
+
+			delete[] buffer;
+			break;
+		}
 		}
 	}
 

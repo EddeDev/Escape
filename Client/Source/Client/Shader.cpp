@@ -83,6 +83,7 @@ namespace esc {
 			case GL_INT_VEC4:   return ShaderDataType::Int4;
 			case GL_FLOAT_MAT3: return ShaderDataType::Mat3;
 			case GL_FLOAT_MAT4: return ShaderDataType::Mat4;
+			case GL_SAMPLER_2D: return ShaderDataType::Int;
 			}
 			std::cerr << "Unknown shader data type!" << std::endl;
 			return ShaderDataType::None;

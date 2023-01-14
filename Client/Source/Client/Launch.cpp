@@ -14,7 +14,7 @@ namespace esc {
 
 		std::cout << "Username: ";
 		std::string username;
-#if 0
+#if 1
 		std::cin >> username;
 #else
 		username = "EddeDev";
