@@ -215,6 +215,22 @@ namespace esc {
 			
 			break;
 		}
+		case PacketType::Input:
+		{
+			InputPacket inputPacket;
+			memcpy(&inputPacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(InputPacket));
+
+			uint32 bufferSize = sizeof(PacketHeader) + sizeof(InputPacket);
+			uint8* buffer = new uint8[bufferSize];
+			memcpy(buffer, &header, sizeof(PacketHeader));
+			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &inputPacket, sizeof(InputPacket));
+
+			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
+			enet_host_broadcast(m_Server, 0, packet);
+
+			delete[] buffer;
+			break;
+		}
 		case PacketType::TransformUpdate:
 		{
 			TransformUpdatePacket transformPacket;

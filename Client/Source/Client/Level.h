@@ -49,6 +49,8 @@ namespace esc {
 		Ref<Entity> m_PlayerEntity;
 		
 		Camera m_Camera;
+
+		InputPacket m_LastInputPacket;
 		TransformUpdatePacket m_LastTransformUpdate;
 	};
 

@@ -10,8 +10,10 @@ namespace esc {
 		Connect = 1,
 		Disconnect = 2,
 		ID = 3,
-		TransformUpdate = 4,
-		ColorUpdate = 5
+		Input = 4,
+		LevelData = 5,
+		TransformUpdate = 6,
+		ColorUpdate = 7
 	};
 	
 	struct PacketHeader
@@ -35,6 +37,31 @@ namespace esc {
 		int32 ID = 0;
 	};
 
+	struct InputPacket
+	{
+		float HorizontalAxis = 0.0f;
+		float VerticalAxis = 0.0f;
+		float VelocityX = 0.0f;
+		float VelocityY = 0.0f;
+		float Speed = 0.0f;
+		bool Jump = false;
+
+		bool operator==(const InputPacket& other) const
+		{
+			return HorizontalAxis == other.HorizontalAxis && 
+				VerticalAxis == other.VerticalAxis &&
+				VelocityX == other.VelocityX &&
+				VelocityY == other.VelocityY &&
+				Speed == other.Speed && 
+				Jump == other.Jump;
+		}
+	};
+
+	struct LevelDataPacket
+	{
+		
+	};
+
 	struct TransformUpdatePacket
 	{
 		float PositionX = 0.0f;
@@ -47,7 +74,11 @@ namespace esc {
 
 		bool operator==(const TransformUpdatePacket& other) const
 		{
-			return PositionX == other.PositionX && PositionY == other.PositionY && Angle == other.Angle && ScaleX == other.ScaleX && ScaleY == other.ScaleY;
+			return PositionX == other.PositionX && 
+				PositionY == other.PositionY && 
+				Angle == other.Angle && 
+				ScaleX == other.ScaleX && 
+				ScaleY == other.ScaleY;
 		}
 	};
 

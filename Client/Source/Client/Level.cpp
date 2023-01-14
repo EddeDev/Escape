@@ -134,14 +134,14 @@ namespace esc {
 
 		m_Renderer->EndScene();
 	
-		auto& clientData = EscapeGame::Get().GetClient()->GetClientData();
-		for (const auto& [id, data] : clientData)
+		const auto& clientData = EscapeGame::Get().GetClient()->GetClientData();
+		for (auto& [id, data] : clientData)
 		{
 			if (m_ClientPlayerEntities.find(id) == m_ClientPlayerEntities.end())
 			{
 				EntityCreateInfo playerEntityCreateInfo;
 				playerEntityCreateInfo.World = m_PhysicsWorld;
-				playerEntityCreateInfo.IsKinematic = true;
+				playerEntityCreateInfo.IsDynamic = true;
 				playerEntityCreateInfo.FixedRotation = true;
 				playerEntityCreateInfo.AllowSleep = false;
 				playerEntityCreateInfo.Position = { data.LastTransformUpdate.PositionX, data.LastTransformUpdate.PositionY };
@@ -155,15 +155,7 @@ namespace esc {
 				m_ClientPlayerEntities[id] = Ref<Entity>::Create(playerEntityCreateInfo);
 			}
 
-			const auto& transform = data.LastTransformUpdate;
-			const auto& color = data.LastColorUpdate;
-
 			Ref<Entity> entity = m_ClientPlayerEntities.at(id);
-			entity->SetPosition({ transform.PositionX, transform.PositionY });
-			entity->SetAngle(transform.Angle);
-			entity->SetScale({ transform.ScaleX, transform.ScaleY });
-
-			// Temp
 			entity->SetColor({ 0.7f, 0.7f, 0.9f, 1.0f });
 		}
 	}
@@ -184,6 +176,8 @@ namespace esc {
 		float cameraMoveSpeed = 2.0f * m_FixedTimestep;
 		m_Camera.SetPosition(glm::lerp(m_Camera.GetPosition(), m_PlayerEntity->GetPosition(), cameraMoveSpeed));
 
+		const float jumpForce = 5.0f;
+
 #if 0
 		bool isGrounded = m_PlayerEntity->IsTouching(m_GroundEntity);
 #else
@@ -192,10 +186,43 @@ namespace esc {
 		if (isGrounded)
 		{
 			if (EscapeGame::Get().GetKeyboard()->GetKey(KeyCode::Space) || EscapeGame::Get().GetGamepad()->GetButton(GamepadButtonCode::A))
-			{
-				float jumpForce = 5.0f;
 				m_PlayerEntity->SetLinearVelocity({ m_PlayerEntity->GetLinearVelocity().x, jumpForce });
+		}
+
+		const auto& clientData = EscapeGame::Get().GetClient()->GetClientData();
+		for (auto& [id, data] : clientData)
+		{
+			if (m_ClientPlayerEntities.find(id) == m_ClientPlayerEntities.end())
+				continue;
+
+			Ref<Entity> entity = m_ClientPlayerEntities[id];
+			auto& input = data.LastInputUpdate;
+			entity->SetLinearVelocity({ input.HorizontalAxis * input.Speed, entity->GetLinearVelocity().y });
+
+			if (entity->IsGrounded())
+			{
+				if (input.Jump)
+					entity->SetLinearVelocity({ entity->GetLinearVelocity().x, jumpForce });
 			}
+
+			glm::vec2 deltaVelocity = { input.VelocityX - entity->GetLinearVelocity().x, input.VelocityY - entity->GetLinearVelocity().y };
+			entity->SetLinearVelocity(entity->GetLinearVelocity() + deltaVelocity);
+		}
+
+		// Input
+		{
+			InputPacket packet = {};
+			packet.HorizontalAxis = x;
+			packet.VerticalAxis = y;
+			packet.VelocityX = m_PlayerEntity->GetLinearVelocity().x;
+			packet.VelocityY = m_PlayerEntity->GetLinearVelocity().y;
+			packet.Speed = playerSpeed;
+			packet.Jump = EscapeGame::Get().GetKeyboard()->GetKey(KeyCode::Space) || EscapeGame::Get().GetGamepad()->GetButton(GamepadButtonCode::A);
+
+			if (packet != m_LastInputPacket)
+				EscapeGame::Get().GetClient()->SendPacket(PacketType::Input, packet);
+
+			m_LastInputPacket = packet;
 		}
 
 		// Transform
@@ -211,6 +238,30 @@ namespace esc {
 				EscapeGame::Get().GetClient()->SendPacket(PacketType::TransformUpdate, update);
 
 			m_LastTransformUpdate = update;
+		}
+
+		for (auto& [id, data] : clientData)
+		{
+			if (m_ClientPlayerEntities.find(id) != m_ClientPlayerEntities.end())
+			{
+				Ref<Entity> entity = m_ClientPlayerEntities.at(id);
+
+				auto& transform = data.LastTransformUpdate;
+				glm::vec2 position = { transform.PositionX, transform.PositionY };
+				float angle = transform.Angle;
+				glm::vec2 scale = { transform.ScaleX, transform.ScaleY };
+
+#define LERP 0
+#if LERP
+				entity->SetPosition(glm::lerp(entity->GetPosition(), position, 10.0f * m_FixedTimestep));
+				entity->SetAngle(glm::lerp(entity->GetAngle(), angle, 10.0f * m_FixedTimestep));
+				entity->SetScale(glm::lerp(entity->GetScale(), scale, 10.0f * m_FixedTimestep));
+#else
+				entity->SetPosition(position);
+				entity->SetAngle(angle);
+				entity->SetScale(scale);
+#endif
+			}
 		}
 	}
 

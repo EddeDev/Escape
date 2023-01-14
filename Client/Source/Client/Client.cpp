@@ -36,7 +36,7 @@ namespace esc {
 		}
 
 		ENetEvent event = {};
-		if (enet_host_service(m_Client, &event, 2000) &&
+		if (enet_host_service(m_Client, &event, 500) &&
 			event.type == ENET_EVENT_TYPE_CONNECT)
 		{
 			std::cout << "Connection to " << createInfo.Address << ":" << createInfo.Port << " succeeded." << std::endl;
@@ -117,6 +117,18 @@ namespace esc {
 				DisconnectPacket packet;
 				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(DisconnectPacket));
 				m_ClientData.erase(packet.ID);
+			}
+			break;
+		}
+		case PacketType::Input:
+		{
+			if (header.ID != m_LocalID)
+			{
+				InputPacket packet;
+				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(InputPacket));
+				
+				auto& clientData = m_ClientData[header.ID];
+				clientData.LastInputUpdate = packet;
 			}
 			break;
 		}

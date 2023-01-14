@@ -14,7 +14,12 @@ namespace esc {
 
 		std::cout << "Username: ";
 		std::string username;
+#if 0
 		std::cin >> username;
+#else
+		username = "EddeDev";
+		std::cout << username << std::endl;
+#endif
 
 		EscapeGame* instance = new EscapeGame(ESCAPE_TEST_ADDRESS, ESCAPE_DEFAULT_PORT, username);
 		instance->Run();

@@ -8,6 +8,9 @@ namespace esc {
 	Entity::Entity(const EntityCreateInfo& createInfo)
 		: m_Scale(createInfo.Scale), m_Color(createInfo.Color), m_DebugName(createInfo.DebugName)
 	{
+		if (!createInfo.World)
+			__debugbreak();
+
 		b2BodyDef bodyDef;
 		if (createInfo.IsKinematic)
 			bodyDef.type = b2_kinematicBody;

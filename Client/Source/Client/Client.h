@@ -18,6 +18,7 @@ namespace esc {
 	{
 		int32 ID = -1;
 		std::string Username = "";
+		InputPacket LastInputUpdate;
 		TransformUpdatePacket LastTransformUpdate;
 		ColorUpdatePacket LastColorUpdate;
 	};
