@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 struct GLFWwindow;
 
 namespace esc {
@@ -24,6 +26,7 @@ namespace esc {
 
 		bool IsKeyDown(int32 key) const;
 		bool IsMouseButtonDown(int32 button) const;
+		glm::vec2 GetMousePosition() const;
 
 		void AddCloseCallback(const std::function<void()>& callback) { m_Data.CloseCallbacks.push_back(callback); }
 		void AddResizeCallback(const std::function<void(int32, int32)>& callback) { m_Data.ResizeCallbacks.push_back(callback); }

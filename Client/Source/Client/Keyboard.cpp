@@ -6,7 +6,7 @@ namespace esc {
 	Keyboard::Keyboard(Ref<Window>& window)
 		: m_Window(window)
 	{
-		m_StateBitFields.resize(KeyCode::Last);
+		m_StateBitFields.resize((size_t)KeyCode::Last);
 
 		window->AddKeyPressCallback(ESCAPE_BIND_CALLBACK(OnKeyPress, this));
 		window->AddKeyReleaseCallback(ESCAPE_BIND_CALLBACK(OnKeyRelease, this));
@@ -43,17 +43,17 @@ namespace esc {
 
 	bool Keyboard::GetKey(KeyCode key) const
 	{
-		return m_Window->IsKeyDown(key);
+		return m_Window->IsKeyDown((int32)key);
 	}
 
 	bool Keyboard::GetKeyDown(KeyCode key) const
 	{
-		return m_StateBitFields[key] & 0b00000001;
+		return m_StateBitFields[(int32)key] & 0b00000001;
 	}
 
 	bool Keyboard::GetKeyUp(KeyCode key) const
 	{
-		return (m_StateBitFields[key] & 0b00000010) >> 1;
+		return (m_StateBitFields[(int32)key] & 0b00000010) >> 1;
 	}
 
 	float Keyboard::GetHorizontalAxis() const

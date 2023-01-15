@@ -1,8 +1,6 @@
 #include "ClientPCH.h"
 #include "Shader.h"
 
-#include "FileUtils.h"
-
 #include <glad/glad.h>
 
 namespace esc {
@@ -91,11 +89,12 @@ namespace esc {
 
 	}
 
-	Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	Shader::Shader(const ShaderInfo& info)
+		: m_Info(info)
 	{
 		std::unordered_map<ShaderStage, std::string> sources;
-		sources[ShaderStage::Vertex] = FileUtils::ReadFile(vertexShaderPath);
-		sources[ShaderStage::Fragment] = FileUtils::ReadFile(fragmentShaderPath);
+		sources[ShaderStage::Vertex] = info.VertexShaderSource;
+		sources[ShaderStage::Fragment] = info.FragmentShaderSource;
 
 		Compile(sources);
 		Reflect();

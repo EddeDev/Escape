@@ -1,6 +1,8 @@
 #include "ClientPCH.h"
 #include "Renderer.h"
 
+#include "ResourceManager.h"
+
 #include <glad/glad.h>
 
 namespace esc {
@@ -11,7 +13,7 @@ namespace esc {
 
 		// Quads
 		{
-			m_QuadShader = Ref<Shader>::Create("Resources/Shaders/VertexShader.glsl", "Resources/Shaders/FragmentShader.glsl");
+			m_QuadShader = ResourceManager::GetShader("Quad");
 
 			GraphicsPipelineCreateInfo pipelineCreateInfo;
 			pipelineCreateInfo.Shader = m_QuadShader;

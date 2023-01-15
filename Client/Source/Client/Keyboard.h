@@ -4,7 +4,7 @@
 
 namespace esc {
 
-	enum KeyCode : int32
+	enum class KeyCode : int32
 	{
 		Space = 32,
 		Apostrophe = 39,

@@ -104,6 +104,14 @@ namespace esc {
 				ConnectPacket packet;
 				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(ConnectPacket));
 
+#if 0
+				if (m_ClientData.find(header.ID) != m_ClientData.end())
+				{
+					// TODO: HACK
+					m_ClientData.erase(header.ID);
+				}
+#endif
+
 				auto& clientData = m_ClientData[header.ID];
 				clientData.ID = header.ID;
 				clientData.Username = packet.Username;
@@ -119,6 +127,10 @@ namespace esc {
 			{
 				DisconnectPacket packet;
 				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(DisconnectPacket));
+				for (auto& callback : m_ClientDisconnectCallbacks)
+					callback(packet.ID);
+				if (m_ClientData.find(header.ID) == m_ClientData.end())
+					__debugbreak();
 				m_ClientData.erase(packet.ID);
 			}
 			break;

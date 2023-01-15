@@ -84,7 +84,7 @@ namespace esc {
 
 	struct PlayerUpdatePacket
 	{
-		char TexturePath[128] = { '\n' };
+		char TextureName[128] = { '\n' };
 		float ColorR = 0.0f;
 		float ColorG = 0.0f;
 		float ColorB = 0.0f;
@@ -93,7 +93,7 @@ namespace esc {
 
 		bool operator==(const PlayerUpdatePacket& other) const
 		{
-			return strcmp(TexturePath, other.TexturePath) == 0 &&
+			return strcmp(TextureName, other.TextureName) == 0 &&
 				ColorR == other.ColorR && 
 				ColorG == other.ColorG && 
 				ColorB == other.ColorB;

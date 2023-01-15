@@ -2,6 +2,7 @@
 #include "Level.h"
 
 #include "EscapeGame.h"
+#include "ResourceManager.h"
 #include "Random.h"
 
 #include <glm/glm.hpp>
@@ -22,16 +23,17 @@ namespace esc {
 		m_PhysicsWorld = new b2World({ 0.0f, -9.81f });
 
 		ChunkSpecification grassChunkSpec;
-		grassChunkSpec.Mapping[TileType::Middle] = "Resources/Textures/Grass/Middle.tga";
-		grassChunkSpec.Mapping[TileType::TopSide] = "Resources/Textures/Grass/TopSide.tga";
-		grassChunkSpec.Mapping[TileType::BottomSide] = "Resources/Textures/Grass/BottomSide.tga";
-		grassChunkSpec.Mapping[TileType::LeftSide] = "Resources/Textures/Grass/LeftSide.tga";
-		grassChunkSpec.Mapping[TileType::RightSide] = "Resources/Textures/Grass/RightSide.tga";
-		grassChunkSpec.Mapping[TileType::TopLeftCorner] = "Resources/Textures/Grass/TopLeft.tga";
-		grassChunkSpec.Mapping[TileType::TopRightCorner] = "Resources/Textures/Grass/TopRight.tga";
-		grassChunkSpec.Mapping[TileType::BottomLeftCorner] = "Resources/Textures/Grass/BottomLeft.tga";
-		grassChunkSpec.Mapping[TileType::BottomRightCorner] = "Resources/Textures/Grass/BottomRight.tga";
+		grassChunkSpec.Mapping[TileType::Middle] = "Grass_Middle";
+		grassChunkSpec.Mapping[TileType::TopSide] = "Grass_TopSide";
+		grassChunkSpec.Mapping[TileType::BottomSide] = "Grass_BottomSide";
+		grassChunkSpec.Mapping[TileType::LeftSide] = "Grass_LeftSide";
+		grassChunkSpec.Mapping[TileType::RightSide] = "Grass_RightSide";
+		grassChunkSpec.Mapping[TileType::TopLeftCorner] = "Grass_TopLeft";
+		grassChunkSpec.Mapping[TileType::TopRightCorner] = "Grass_TopRight";
+		grassChunkSpec.Mapping[TileType::BottomLeftCorner] = "Grass_BottomLeft";
+		grassChunkSpec.Mapping[TileType::BottomRightCorner] = "Grass_BottomRight";
 
+		// Chunk 1
 		{
 			EntityCreateInfo createInfo;
 			createInfo.World = m_PhysicsWorld;
@@ -43,6 +45,7 @@ namespace esc {
 			m_Entities.push_back(Ref<Entity>::Create(createInfo));
 		}
 
+		// Chunk 2
 		{
 			EntityCreateInfo createInfo;
 			createInfo.World = m_PhysicsWorld;
@@ -54,25 +57,28 @@ namespace esc {
 			m_Entities.push_back(Ref<Entity>::Create(createInfo));
 		}
 
-		EntityCreateInfo playerEntityCreateInfo;
-		playerEntityCreateInfo.World = m_PhysicsWorld;
-		playerEntityCreateInfo.IsDynamic = true;
-		playerEntityCreateInfo.FixedRotation = true;
-		playerEntityCreateInfo.AllowSleep = false;
-		playerEntityCreateInfo.Position = { -2.0f, 10.0f };
-		playerEntityCreateInfo.Scale = { 1.0f, 2.0f };
-		// playerEntityCreateInfo.Color = { 0.8f, 0.2f, 0.2f, 1.0f };
-		playerEntityCreateInfo.Friction = 0.0f;
-		playerEntityCreateInfo.DebugName = "Player";
-		TextureInfo playerTextureInfo;
-		std::random_device seeder;
-		std::mt19937 engine(seeder());
-		std::uniform_int_distribution<int> dist(1, 5);
-		int32 random = dist(engine);
-		playerTextureInfo.Filepath = "Resources/Textures/TestChar" + std::to_string(random) + ".tga";
-		playerEntityCreateInfo.Texture = Ref<Texture>::Create(playerTextureInfo);
-		m_PlayerEntity = Ref<Entity>::Create(playerEntityCreateInfo);
-		m_Entities.push_back(m_PlayerEntity);
+		// Player
+		{
+			EntityCreateInfo createInfo;
+			createInfo.World = m_PhysicsWorld;
+			createInfo.IsDynamic = true;
+			createInfo.FixedRotation = true;
+			createInfo.AllowSleep = false;
+			createInfo.Position = { -2.0f, 10.0f };
+			createInfo.Scale = { 1.0f, 2.0f };
+			createInfo.Friction = 0.0f;
+			createInfo.DebugName = "Player";
+
+			std::random_device seeder;
+			std::mt19937 engine(seeder());
+			std::uniform_int_distribution<int> dist(1, 5);
+			int32 random = dist(engine);
+
+			createInfo.Texture = ResourceManager::GetTexture("TestChar" + std::to_string(random));
+
+			m_PlayerEntity = Ref<Entity>::Create(createInfo);
+			m_Entities.push_back(m_PlayerEntity);
+		}
 
 		// Bridge
 		{
@@ -85,13 +91,7 @@ namespace esc {
 			m_Entities.push_back(Ref<Entity>::Create(createInfo));
 		}
 
-		TextureInfo cloudTextureInfo;
-		cloudTextureInfo.Filepath = "Resources/Textures/CloudWithoutOutlines.tga";
-		m_CloudTexture = Ref<Texture>::Create(cloudTextureInfo);
-
-		TextureInfo crateTextureInfo;
-		crateTextureInfo.Filepath = "Resources/Textures/Crate.tga";
-		Ref<Texture> crateTexture = Ref<Texture>::Create(crateTextureInfo);
+		m_CloudTexture = ResourceManager::GetTexture("CloudWithoutOutlines");
 
 		if (false)
 		{
@@ -100,7 +100,7 @@ namespace esc {
 			createInfo.IsDynamic = true;
 			createInfo.Position = { 5.0f, 5.0f };
 			createInfo.Scale = { 2.0f, 2.0f };
-			createInfo.Texture = crateTexture;
+			createInfo.Texture = ResourceManager::GetTexture("Crate");
 			m_Entities.push_back(Ref<Entity>::Create(createInfo));
 		}
 		
@@ -115,8 +115,7 @@ namespace esc {
 				entityCreateInfo.IsDynamic = true;
 				entityCreateInfo.Position = { 20.0f + (float)x * (1.0f + offset), 5.0f + (float)y * (1.0f + offset) };
 				entityCreateInfo.Scale = { 1.0f, 1.0f };
-				// entityCreateInfo.Color = { 0.3f, 0.8f, 0.5f, 1.0f };
-				entityCreateInfo.Texture = crateTexture;
+				entityCreateInfo.Texture = ResourceManager::GetTexture("Crate");
 				m_Entities.push_back(Ref<Entity>::Create(entityCreateInfo));
 			}
 		}
@@ -128,9 +127,26 @@ namespace esc {
 		{
 			auto& clientData = EscapeGame::Get().GetClient()->GetClientData();
 			if (clientData.find(clientID) == clientData.end())
+			{
+				std::cout << "Client is null!" << std::endl;
 				__debugbreak();
-
+			}
 			m_SendPackets = true;
+		});
+
+		EscapeGame::Get().GetClient()->AddClientDisconnectCallback([this](auto clientID)
+		{
+			auto& clientData = EscapeGame::Get().GetClient()->GetClientData();
+			if (clientData.find(clientID) == clientData.end())
+			{
+				std::cout << "Client is null!" << std::endl;
+				__debugbreak();
+			}
+			if (clientData.at(clientID).Username.empty())
+				__debugbreak();
+			std::cout << clientData.at(clientID).Username << " left the game!" << std::endl;
+
+			m_ClientPlayerEntities.erase(clientID);
 		});
 	}
 
@@ -141,6 +157,14 @@ namespace esc {
 
 	void Level::OnUpdate(float deltaTime)
 	{
+		if (EscapeGame::Get().GetKeyboard()->GetKeyDown(KeyCode::P))
+		{
+			auto& clientData = EscapeGame::Get().GetClient()->GetClientData();
+			std::cout << "Connected players:" << std::endl;
+			for (auto& [id, data] : clientData)
+				std::cout << "  " << data.Username << " (" << id << ")" << std::endl;
+		}
+
 		if (m_Accumulator > m_FixedTimestep)
 			m_Accumulator = 0.0f;
 
@@ -322,7 +346,7 @@ namespace esc {
 				playerEntityCreateInfo.AllowSleep = false;
 				playerEntityCreateInfo.Position = { data.LastTransformUpdate.PositionX, data.LastTransformUpdate.PositionY };
 				playerEntityCreateInfo.Scale = { data.LastTransformUpdate.ScaleX, data.LastTransformUpdate.ScaleY };
-				// playerEntityCreateInfo.Color = { data.LastPlayerUpdate.ColorR, data.LastPlayerUpdate.ColorG, data.LastPlayerUpdate.ColorB, 1.0f };
+				playerEntityCreateInfo.Color = { data.LastPlayerUpdate.ColorR, data.LastPlayerUpdate.ColorG, data.LastPlayerUpdate.ColorB, 1.0f };
 				playerEntityCreateInfo.Friction = 0.0f;
 
 				if (playerEntityCreateInfo.Scale.x == 0.0f || playerEntityCreateInfo.Scale.y == 0.0f)
@@ -335,31 +359,25 @@ namespace esc {
 			auto& materialData = data.LastPlayerUpdate;
 			entity->SetColor({ materialData.ColorR, materialData.ColorG, materialData.ColorB, 1.0f });
 
-#if 0
-			entity->SetColor({ 0.7f, 0.7f, 0.9f, 1.0f });
-#endif
-
 			Ref<Texture> texture = entity->GetTexture();
 			if (texture)
 			{
-				auto& textureInfo = texture->GetInfo();
-				if (strcmp(textureInfo.Filepath.c_str(), materialData.TexturePath) != 0)
+				std::string textureName = texture->GetInfo().GetName();
+				if (strcmp(textureName.c_str(), materialData.TextureName) != 0)
 				{
-					TextureInfo newTextureInfo;
-					newTextureInfo.Filepath = materialData.TexturePath;
-					entity->SetTexture(Ref<Texture>::Create(newTextureInfo));
+					Ref<Texture> newTexture = ResourceManager::GetTexture(materialData.TextureName);
+					if (!newTexture)
+					{
+						std::cout << "Texture is null! (" << materialData.TextureName << ")" << std::endl;
+						__debugbreak();
+					}
+					entity->SetTexture(newTexture);
 				}
 			}
 			else
 			{
-				TextureInfo newTextureInfo;
-				newTextureInfo.Filepath = materialData.TexturePath;
-				if (!newTextureInfo.Filepath.empty())
-				{
-					// TODO: temp
-					if (std::filesystem::exists(newTextureInfo.Filepath))
-						entity->SetTexture(Ref<Texture>::Create(newTextureInfo));
-				}
+				Ref<Texture> newTexture = ResourceManager::GetTexture(materialData.TextureName);
+				entity->SetTexture(newTexture);
 			}
 		}
 	}
@@ -380,7 +398,6 @@ namespace esc {
 		float cameraMoveSpeed = 2.0f * m_FixedTimestep;
 		m_Camera.SetPosition(glm::lerp(m_Camera.GetPosition(), m_PlayerEntity->GetPosition(), cameraMoveSpeed));
 
-		// TODO: temp
 		if (m_PlayerEntity->GetPosition().y < -35.0f)
 		{
 			m_PlayerEntity->SetPosition({ -2.0f, 10.0f });
@@ -450,16 +467,14 @@ namespace esc {
 		// Player Update (Material data)
 		{
 			PlayerUpdatePacket update = {};
-			strncpy_s(update.TexturePath, m_PlayerEntity->GetTexture()->GetInfo().Filepath.c_str(), m_PlayerEntity->GetTexture()->GetInfo().Filepath.size());
+			std::string textureName = m_PlayerEntity->GetTexture()->GetInfo().GetName();
+			strncpy_s(update.TextureName, textureName.c_str(), textureName.size());
 			update.ColorR = m_PlayerEntity->GetColor().r;
 			update.ColorG = m_PlayerEntity->GetColor().g;
 			update.ColorB = m_PlayerEntity->GetColor().b;
 
 			if (update != m_LastPlayerUpdate || m_SendPackets)
-			{
-				std::cout << "Sending PlayerUpdate packet!" << std::endl;
 				EscapeGame::Get().GetClient()->SendPacket(PacketType::PlayerUpdate, update);
-			}
 
 			m_LastPlayerUpdate = update;
 		}

@@ -2,9 +2,11 @@
 
 #include "Window.h"
 
+#include <glm/glm.hpp>
+
 namespace esc {
 
-	enum MouseButtonCode : int32
+	enum class MouseButtonCode : int32
 	{
 		Button1 = 0,
 		Button2 = 1,
@@ -32,13 +34,18 @@ namespace esc {
 		bool GetButton(MouseButtonCode button) const;
 		bool GetButtonDown(MouseButtonCode button) const;
 		bool GetButtonUp(MouseButtonCode button) const;
+
+		glm::vec2 GetMousePosition() const { return m_MousePosition; }
+		glm::vec2 GetMouseOrthoPosition(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) const;
 	private:
 		void OnMouseButtonPress(int32 button);
 		void OnMouseButtonRelease(int32 button);
 	private:
 		Ref<Window>& m_Window;
-
 		std::vector<uint8> m_StateBitFields;
+
+		glm::vec2 m_MousePosition = glm::vec2(0.0f);
+		glm::vec2 m_MousePositionDelta = glm::vec2(0.0f);
 	};
 
 }

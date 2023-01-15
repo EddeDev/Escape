@@ -199,4 +199,11 @@ namespace esc {
 		return state == GLFW_PRESS;
 	}
 
+	glm::vec2 Window::GetMousePosition() const
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(m_WindowHandle, &xpos, &ypos);
+		return { (float)xpos, (float)ypos };
+	}
+
 }

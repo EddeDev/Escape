@@ -1,5 +1,7 @@
 #pragma once
 
+#include <filesystem>
+
 namespace esc {
 
 	struct TextureInfo
@@ -10,6 +12,12 @@ namespace esc {
 		int32 Height = 1;
 		int32 Channels = 4;
 		uint8* Data = nullptr;
+
+		std::string GetName() const
+		{
+			std::filesystem::path path = Filepath;
+			return path.filename().stem().string();
+		}
 	};
 
 	class Texture : public ReferenceCounted

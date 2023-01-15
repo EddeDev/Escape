@@ -47,10 +47,16 @@ namespace esc {
 		ShaderDataType Type = ShaderDataType::None;
 	};
 
+	struct ShaderInfo
+	{
+		std::string VertexShaderSource;
+		std::string FragmentShaderSource;
+	};
+
 	class Shader : public ReferenceCounted
 	{
 	public:
-		Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+		Shader(const ShaderInfo& info);
 		virtual ~Shader();
 
 		void Bind() const;
@@ -71,12 +77,14 @@ namespace esc {
 			SetUniform(uniform, (const void*)&value);
 		}
 
+		const ShaderInfo& GetInfo() const { return m_Info; }
 		const ShaderInputLayout& GetInputLayout() const { return m_InputLayout; }
 	private:
 		void Compile(const std::unordered_map<ShaderStage, std::string>& sources);
 		void Reflect();
 	private:
 		uint32 m_ProgramID = 0;
+		ShaderInfo m_Info;
 		ShaderInputLayout m_InputLayout;
 
 		std::unordered_map<std::string, ShaderUniform> m_Uniforms;

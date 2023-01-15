@@ -13,8 +13,10 @@ namespace esc {
 	{
 	public:
 		EscapeGame(const std::string& address, uint16 port, const std::string& username);
+		~EscapeGame();
 
 		void Run();
+		void Close();
 
 		Ref<Window> GetWindow() const { return m_Window; }
 		Ref<Keyboard> GetKeyboard() const { return m_Keyboard; }
@@ -24,7 +26,6 @@ namespace esc {
 
 		static EscapeGame& Get() { return *s_Instance; }
 	private:
-		void OnWindowClose();
 		void OnWindowResize(int32 width, int32 height);
 	private:
 		inline static EscapeGame* s_Instance = nullptr;

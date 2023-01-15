@@ -1,6 +1,8 @@
 #include "ClientPCH.h"
 #include "EscapeGame.h"
 
+#include "ResourceManager.h"
+
 #include <glad/glad.h>
 
 namespace esc {
@@ -16,8 +18,10 @@ namespace esc {
 		windowCreateInfo.Title = "Escape";
 
 		m_Window = Ref<Window>::Create(windowCreateInfo);
-		m_Window->AddCloseCallback(ESCAPE_BIND_CALLBACK(OnWindowClose, this));
+		m_Window->AddCloseCallback(ESCAPE_BIND_CALLBACK(Close, this));
 		m_Window->AddResizeCallback(ESCAPE_BIND_CALLBACK(OnWindowResize, this));
+
+		ResourceManager::Init();
 
 		m_Keyboard = Ref<Keyboard>::Create(m_Window);
 		m_Mouse = Ref<Mouse>::Create(m_Window);
@@ -32,6 +36,11 @@ namespace esc {
 
 		LevelSpecification levelSpec;
 		m_Level = Ref<Level>::Create(levelSpec);
+	}
+
+	EscapeGame::~EscapeGame()
+	{
+		ResourceManager::Shutdown();
 	}
 
 	void EscapeGame::Run()
@@ -49,7 +58,9 @@ namespace esc {
 				m_Running = false;
 
 			m_Client->Update();
-			m_Level->OnUpdate(deltaTime);
+
+			if (!m_Keyboard->GetKey(KeyCode::F1))
+				m_Level->OnUpdate(deltaTime);
 
 			m_Keyboard->Update();
 			m_Mouse->Update();
@@ -58,7 +69,7 @@ namespace esc {
 		}
 	}
 
-	void EscapeGame::OnWindowClose()
+	void EscapeGame::Close()
 	{
 		m_Running = false;
 	}

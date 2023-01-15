@@ -117,6 +117,11 @@ namespace esc {
 					header.ID = id;
 					header.Type = PacketType::Connect;
 
+#if 0
+					if (data.Username.empty())
+						__debugbreak();
+#endif
+
 					ConnectPacket connectPacket;
 					strncpy_s(connectPacket.Username, data.Username.c_str(), data.Username.size());
 

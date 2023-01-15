@@ -1,6 +1,8 @@
 #include "ClientPCH.h"
 #include "Entity.h"
 
+#include "ResourceManager.h"
+
 #include <glm/gtx/vector_angle.hpp>
 
 namespace esc {
@@ -17,12 +19,8 @@ namespace esc {
 
 		if (m_IsChunk)
 		{
-			for (auto& [type, texturePath] : createInfo.ChunkSpec->Mapping)
-			{
-				TextureInfo textureInfo;
-				textureInfo.Filepath = texturePath;
-				m_ChunkTextures[type] = Ref<Texture>::Create(textureInfo);
-			}
+			for (auto& [type, textureName] : createInfo.ChunkSpec->Mapping)
+				m_ChunkTextures[type] = ResourceManager::GetTexture(textureName);
 		}
 		
 		b2BodyDef bodyDef;

@@ -74,6 +74,7 @@ project "Client"
         "%{prj.name}/Libraries/GLFW/include",
         "%{prj.name}/Libraries/Glad/include",
         "%{prj.name}/Libraries/Box2D/include",
+        "%{prj.name}/Libraries/zlib/include",
         "%{prj.name}/Libraries/glm",
         "%{prj.name}/Libraries/stb_image"
     }
@@ -86,6 +87,7 @@ project "Client"
         "GLFW",
         "Glad",
         "Box2D",
+        "zlib",
 
         "Ws2_32.lib",
         "Mswsock.lib",
@@ -124,7 +126,7 @@ project "Client"
         optimize "On"
 
     filter "configurations:Shipping"
-        kind "WindowedApp"
+        kind "ConsoleApp"
         defines "ESCAPE_BUILD_SHIPPING"
         runtime "Release"
         optimize "On"
@@ -197,4 +199,5 @@ group "Libraries"
     include "Client/Libraries/GLFW"
     include "Client/Libraries/Glad"
     include "Client/Libraries/Box2D"
+    include "Client/Libraries/zlib"
 group ""
