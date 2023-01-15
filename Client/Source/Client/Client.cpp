@@ -104,12 +104,16 @@ namespace esc {
 				ConnectPacket packet;
 				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(ConnectPacket));
 
+				bool exists = m_ClientData.find(header.ID) != m_ClientData.end();
 				auto& clientData = m_ClientData[header.ID];
 				clientData.ID = header.ID;
 				clientData.Username = packet.Username;
 
-				for (auto& callback : m_ClientConnectCallbacks)
-					callback(clientData.ID);
+				if (!exists)
+				{
+					for (auto& callback : m_ClientConnectCallbacks)
+						callback(clientData.ID);
+				}
 			}
 			break;
 		}

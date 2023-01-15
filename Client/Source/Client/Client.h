@@ -57,6 +57,8 @@ namespace esc {
 		void AddClientDisconnectCallback(const std::function<void(int32)>& callback) { m_ClientDisconnectCallbacks.push_back(callback); }
 		void AddEntityUpdateCallback(const std::function<void(const EntityUpdatePacket&)>& callback) { m_EntityUpdateCallbacks.push_back(callback); }
 
+		int32 GetLocalID() const { return m_LocalID; }
+
 		std::map<int32, ClientData>& GetClientData() { return m_ClientData; }
 		const std::map<int32, ClientData>& GetClientData() const { return m_ClientData; }
 	private:

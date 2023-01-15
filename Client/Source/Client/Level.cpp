@@ -147,6 +147,16 @@ namespace esc {
 				std::cout << "Client is null!" << std::endl;
 				__debugbreak();
 			}
+
+			m_SendEntityUpdatePackets = true;
+
+			int32 localID = EscapeGame::Get().GetClient()->GetLocalID();
+			if (localID > 1)
+			{
+				// TODO: HACK
+				m_SendEntityUpdatePackets = false;
+			}
+
 			m_SendPackets = true;
 		});
 
@@ -165,10 +175,8 @@ namespace esc {
 			m_ClientPlayerEntities.erase(clientID);
 		});
 
-		EscapeGame::Get().GetClient()->AddEntityUpdateCallback([this](const auto& packet)
+		EscapeGame::Get().GetClient()->AddEntityUpdateCallback([this](const auto& update)
 		{
-			const EntityUpdatePacket& update = packet;
-			
 			Ref<Entity> entity = m_GlobalEntities[update.ID];
 			entity->SetPosition({ update.PositionX, update.PositionY });
 			entity->SetAngle(update.Angle);
@@ -588,7 +596,7 @@ namespace esc {
 				auto velocity = entity->GetLinearVelocity();
 				const float fct = 0.1f;
 				// TODO: optimize (contacts?)
-				if (velocity.x > fct || velocity.x < -fct || velocity.y > fct || velocity.y < -fct || m_SendPackets)
+				if (velocity.x > fct || velocity.x < -fct || velocity.y > fct || velocity.y < -fct || m_SendEntityUpdatePackets)
 				{
 #if PRINT_MOVING_ENTITIES
 					if (entityPrintIndex > 0)
@@ -607,10 +615,14 @@ namespace esc {
 					update.VelocityX = velocity.x;
 					update.VelocityY = velocity.y;
 
-					if (update != m_LatestEntityUpdateMap[i] || m_SendPackets)
+#if 0
+					if (update != m_LatestEntityUpdateMap[i] || m_SendEntityUpdatePackets)
+#else
+					if (m_SendEntityUpdatePackets)
+#endif
 					{
-						// std::cout << "Sending EntityUpdate packet! (" << update.ID << ")" << std::endl;
-						// EscapeGame::Get().GetClient()->SendPacket(PacketType::EntityUpdate, update);
+						std::cout << "Sending EntityUpdate packet! (" << update.ID << ")" << std::endl;
+						EscapeGame::Get().GetClient()->SendPacket(PacketType::EntityUpdate, update);
 						m_SentPackets++;
 					}
 
@@ -627,6 +639,12 @@ namespace esc {
 		{
 			// TODO: Print something
 			m_SendPackets = false;
+		}
+
+		if (m_SendEntityUpdatePackets)
+		{
+			// TODO: Print something
+			m_SendEntityUpdatePackets = false;
 		}
 		
 		// std::cout << "Sent packets: " << m_SendPackets << std::endl;

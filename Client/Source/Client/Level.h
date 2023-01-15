@@ -57,6 +57,7 @@ namespace esc {
 		PlayerUpdatePacket m_LatestPlayerUpdate;
 		PhysicsDataPacket m_LatestPhysicsData;
 		std::unordered_map<int32, EntityUpdatePacket> m_LatestEntityUpdateMap;
+		bool m_SendEntityUpdatePackets = false;
 		bool m_SendPackets = false;
 		uint32 m_SentPackets = 0;
 		uint32 m_PacketsPerFrame = 0;
