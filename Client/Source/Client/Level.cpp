@@ -94,7 +94,7 @@ namespace esc {
 		}
 
 		// Bridge
-		if (false)
+		if (true)
 		{
 			EntityCreateInfo createInfo;
 			createInfo.World = m_PhysicsWorld;
@@ -107,7 +107,7 @@ namespace esc {
 
 		m_CloudTexture = ResourceManager::GetTexture("CloudWithoutOutlines");
 
-		if (false)
+		if (true)
 		{
 			EntityCreateInfo createInfo;
 			createInfo.World = m_PhysicsWorld;
