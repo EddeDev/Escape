@@ -78,15 +78,15 @@ namespace esc {
 
 			auto& name = shaderNames[i];
 			name.resize(data.NameSize);
-			gzread(file, name.data(), name.size());
+			gzread(file, name.data(), static_cast<uint32>(name.size()));
 
 			auto& vertexShaderSource = vertexShaderSources[i];
 			vertexShaderSource.resize(data.VertexShaderSourceSize);
-			gzread(file, vertexShaderSource.data(), vertexShaderSource.size());
+			gzread(file, vertexShaderSource.data(), static_cast<uint32>(vertexShaderSource.size()));
 
 			auto& fragmentShaderSource = fragmentShaderSources[i];
 			fragmentShaderSource.resize(data.FragmentShaderSourceSize);
-			gzread(file, fragmentShaderSource.data(), fragmentShaderSource.size());
+			gzread(file, fragmentShaderSource.data(), static_cast<uint32>(fragmentShaderSource.size()));
 		}
 
 		std::vector<TextureData> textureDataHeaders(header.NumTextures);
@@ -100,12 +100,12 @@ namespace esc {
 
 			auto& name = textureNames[i];
 			name.resize(data.NameSize);
-			gzread(file, name.data(), name.size());
+			gzread(file, name.data(), static_cast<uint32>(name.size()));
 
 			auto& binaryData = textureDataStorage[i];
 			size_t dataSize = data.Width * data.Height * data.Channels;
 			binaryData.resize(dataSize);
-			gzread(file, binaryData.data(), binaryData.size());
+			gzread(file, binaryData.data(), static_cast<uint32>(binaryData.size()));
 		}
 
 		gzclose(file);
