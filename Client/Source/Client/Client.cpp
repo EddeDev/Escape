@@ -104,14 +104,6 @@ namespace esc {
 				ConnectPacket packet;
 				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(ConnectPacket));
 
-#if 0
-				if (m_ClientData.find(header.ID) != m_ClientData.end())
-				{
-					// TODO: HACK
-					m_ClientData.erase(header.ID);
-				}
-#endif
-
 				auto& clientData = m_ClientData[header.ID];
 				clientData.ID = header.ID;
 				clientData.Username = packet.Username;
@@ -143,7 +135,7 @@ namespace esc {
 				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(InputPacket));
 				
 				auto& clientData = m_ClientData[header.ID];
-				clientData.LastInputUpdate = packet;
+				clientData.LatestInputUpdate = packet;
 			}
 			break;
 		}
@@ -155,7 +147,7 @@ namespace esc {
 				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(TransformUpdatePacket));
 
 				auto& clientData = m_ClientData[header.ID];
-				clientData.LastTransformUpdate = packet;
+				clientData.LatestTransformUpdate = packet;
 			}
 			break;
 		}
@@ -167,7 +159,30 @@ namespace esc {
 				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(PlayerUpdatePacket));
 
 				auto& clientData = m_ClientData[header.ID];
-				clientData.LastPlayerUpdate = packet;
+				clientData.LatestPlayerUpdate = packet;
+			}
+			break;
+		}
+		case PacketType::PhysicsData:
+		{
+			if (header.ID != m_LocalID)
+			{
+				PhysicsDataPacket packet;
+				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(PhysicsDataPacket));
+
+				auto& clientData = m_ClientData[header.ID];
+				clientData.LatestPhysicsData = packet;
+			}
+			break;
+		}
+		case PacketType::EntityUpdate:
+		{
+			if (header.ID != m_LocalID)
+			{
+				EntityUpdatePacket packet;
+				memcpy(&packet, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(EntityUpdatePacket));
+				for (auto& callback : m_EntityUpdateCallbacks)
+					callback(packet);
 			}
 			break;
 		}

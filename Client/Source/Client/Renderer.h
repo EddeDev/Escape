@@ -20,6 +20,7 @@ namespace esc {
 		void EndScene();
 
 		void RenderQuad(const glm::vec3& position, float angle = 0.0f, const glm::vec3& scale = glm::vec3(1.0f), const glm::vec4& color = glm::vec4(1.0f), Ref<Texture> texture = nullptr, float tilingFactor = 1.0f);
+		void SetColors(const glm::vec4& c1, const glm::vec4& c2, const glm::vec4& c3, const glm::vec4& c4);
 
 		void SetViewportSize(int32 width, int32 height);
 	private:
@@ -67,6 +68,9 @@ namespace esc {
 
 		std::array<Ref<Texture>, s_MaxTextureSlots> m_TextureSlots;
 		uint32 m_TextureSlotIndex = 1;
+
+		std::array<glm::vec4, 4> m_CustomColors;
+		bool m_UseCustomColors = false;
 	};
 
 }

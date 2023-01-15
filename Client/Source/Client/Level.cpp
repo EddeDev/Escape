@@ -40,9 +40,9 @@ namespace esc {
 			createInfo.IsDynamic = false;
 			createInfo.Position = { 0.0f, 0.0f };
 			createInfo.Scale = { 20.0f, 5.0f };
-			createInfo.DebugName = "Chunk";
+			createInfo.DebugName = "Chunk 1";
 			createInfo.ChunkSpec = &grassChunkSpec;
-			m_Entities.push_back(Ref<Entity>::Create(createInfo));
+			m_GlobalEntities.push_back(Ref<Entity>::Create(createInfo));
 		}
 
 		// Chunk 2
@@ -52,9 +52,21 @@ namespace esc {
 			createInfo.IsDynamic = false;
 			createInfo.Position = { 25.0f, 0.0f };
 			createInfo.Scale = { 20.0f, 5.0f };
-			createInfo.DebugName = "Chunk";
+			createInfo.DebugName = "Chunk 2";
 			createInfo.ChunkSpec = &grassChunkSpec;
-			m_Entities.push_back(Ref<Entity>::Create(createInfo));
+			m_GlobalEntities.push_back(Ref<Entity>::Create(createInfo));
+		}
+
+		// Chunk 3
+		{
+			EntityCreateInfo createInfo;
+			createInfo.World = m_PhysicsWorld;
+			createInfo.IsDynamic = false;
+			createInfo.Position = { 45.0f, 5.0f };
+			createInfo.Scale = { 10.0f, 5.0f };
+			createInfo.DebugName = "Chunk 3";
+			createInfo.ChunkSpec = &grassChunkSpec;
+			m_GlobalEntities.push_back(Ref<Entity>::Create(createInfo));
 		}
 
 		// Player
@@ -68,6 +80,8 @@ namespace esc {
 			createInfo.Scale = { 1.0f, 2.0f };
 			createInfo.Friction = 0.0f;
 			createInfo.DebugName = "Player";
+			
+			m_PlayerSpawnPosition = createInfo.Position;
 
 			std::random_device seeder;
 			std::mt19937 engine(seeder());
@@ -77,10 +91,10 @@ namespace esc {
 			createInfo.Texture = ResourceManager::GetTexture("TestChar" + std::to_string(random));
 
 			m_PlayerEntity = Ref<Entity>::Create(createInfo);
-			m_Entities.push_back(m_PlayerEntity);
 		}
 
 		// Bridge
+		if (false)
 		{
 			EntityCreateInfo createInfo;
 			createInfo.World = m_PhysicsWorld;
@@ -88,7 +102,7 @@ namespace esc {
 			createInfo.Position = { 5.0f, 5.0f };
 			createInfo.Scale = { 10.0f, 0.5f };
 			createInfo.Color = { 0.37f, 0.21f, 0.0f, 1.0f };
-			m_Entities.push_back(Ref<Entity>::Create(createInfo));
+			m_GlobalEntities.push_back(Ref<Entity>::Create(createInfo));
 		}
 
 		m_CloudTexture = ResourceManager::GetTexture("CloudWithoutOutlines");
@@ -101,9 +115,10 @@ namespace esc {
 			createInfo.Position = { 5.0f, 5.0f };
 			createInfo.Scale = { 2.0f, 2.0f };
 			createInfo.Texture = ResourceManager::GetTexture("Crate");
-			m_Entities.push_back(Ref<Entity>::Create(createInfo));
+			m_GlobalEntities.push_back(Ref<Entity>::Create(createInfo));
 		}
 		
+#if 0
 		for (uint32 x = 0; x < 8; x++)
 		{
 			for (uint32 y = 0; y < 8; y++)
@@ -116,9 +131,10 @@ namespace esc {
 				entityCreateInfo.Position = { 20.0f + (float)x * (1.0f + offset), 5.0f + (float)y * (1.0f + offset) };
 				entityCreateInfo.Scale = { 1.0f, 1.0f };
 				entityCreateInfo.Texture = ResourceManager::GetTexture("Crate");
-				m_Entities.push_back(Ref<Entity>::Create(entityCreateInfo));
+				m_GlobalEntities.push_back(Ref<Entity>::Create(entityCreateInfo));
 			}
 		}
+#endif
 
 		m_Camera = Camera(window->GetWidth(), window->GetHeight());
 		m_Camera.SetZoomLevel(7.0f);
@@ -148,6 +164,17 @@ namespace esc {
 
 			m_ClientPlayerEntities.erase(clientID);
 		});
+
+		EscapeGame::Get().GetClient()->AddEntityUpdateCallback([this](const auto& packet)
+		{
+			const EntityUpdatePacket& update = packet;
+			
+			Ref<Entity> entity = m_GlobalEntities[update.ID];
+			entity->SetPosition({ update.PositionX, update.PositionY });
+			entity->SetAngle(update.Angle);
+			entity->SetScale({ update.ScaleX, update.ScaleY });
+			entity->SetLinearVelocity({ update.VelocityX, update.VelocityY });
+		});
 	}
 
 	Level::~Level()
@@ -157,6 +184,9 @@ namespace esc {
 
 	void Level::OnUpdate(float deltaTime)
 	{
+		static float s_Time = 0.0f;
+		s_Time += deltaTime;
+
 		if (EscapeGame::Get().GetKeyboard()->GetKeyDown(KeyCode::P))
 		{
 			auto& clientData = EscapeGame::Get().GetClient()->GetClientData();
@@ -188,9 +218,26 @@ namespace esc {
 		}
 
 		m_Renderer->BeginScene(m_Camera);
-		
-		static float globalTime = 0.0f;
-		globalTime += deltaTime;
+
+		// Render sky
+		{
+			glm::vec3 scale = { m_Camera.GetZoomLevel(), m_Camera.GetZoomLevel(), 1.0 };
+			float aspectRatio = m_Camera.GetAspectRatio();
+			scale.x *= aspectRatio;
+			scale *= 2.0f;
+
+#if 1
+			glm::vec4 bottom = { 0.61, 0.95, 0.93, 1.0f };
+			glm::vec4 top = { 0.00, 0.35, 0.90, 1.0f };
+#else
+			glm::vec4 bottom = { 0.95f, 0.95f, 0.96f, 1.0f };
+			glm::vec4 top = { 0.46f, 0.84f, 0.75f, 1.0f };
+			bottom = glm::mix(bottom, top, 0.2f);
+#endif
+
+			m_Renderer->SetColors(bottom, bottom, top, top);
+			m_Renderer->RenderQuad({ m_Camera.GetPosition(), -0.21f}, 0.0f, scale);
+		}
 		
 		struct Cloud
 		{
@@ -205,7 +252,7 @@ namespace esc {
 			Cloud(float posX = 5.0f)
 				: PosX(posX)
 			{
-				StartTime = globalTime;
+				StartTime = s_Time;
 
 				float scale = Random::Range(3.0f, 5.0f);
 				ScaleX = scale * Random::Range(0.9f, 1.1f);
@@ -224,8 +271,8 @@ namespace esc {
 
 			void Render(Ref<Renderer> renderer, Ref<Texture> texture)
 			{
-				float alpha = glm::clamp((globalTime - StartTime) * 0.3f, 0.0f, AlphaMax);
-				renderer->RenderQuad({ PosX, PosY, -0.21f }, 0.0f, { ScaleX, ScaleY, 1.0f }, { 1.0f, 1.0f, 1.0f, alpha }, texture, 1.0f);
+				float alpha = glm::clamp((s_Time - StartTime) * 0.3f, 0.0f, AlphaMax);
+				renderer->RenderQuad({ PosX, PosY, -0.205f }, 0.0f, { ScaleX, ScaleY, 1.0f }, { 1.0f, 1.0f, 1.0f, alpha }, texture, 1.0f);
 			}
 		};
 
@@ -252,7 +299,7 @@ namespace esc {
 			cloud.Render(m_Renderer, m_CloudTexture);
 		}
 
-		for (Ref<Entity> entity : m_Entities)
+		for (Ref<Entity> entity : m_GlobalEntities)
 		{
 			glm::vec3 position = { entity->GetPosition().x, entity->GetPosition().y, -0.2f };
 			float angle = entity->GetAngle();
@@ -321,6 +368,17 @@ namespace esc {
 			}
 		}
 
+		if (m_PlayerEntity)
+		{
+			glm::vec3 position = { m_PlayerEntity->GetPosition().x, m_PlayerEntity->GetPosition().y, -0.2f };
+			float angle = m_PlayerEntity->GetAngle();
+			glm::vec3 scale = { m_PlayerEntity->GetScale().x, m_PlayerEntity->GetScale().y, 1.0f };
+			glm::vec4 color = m_PlayerEntity->GetColor();
+
+			Ref<Texture> texture = m_PlayerEntity->GetTexture();
+			m_Renderer->RenderQuad(position, angle, scale, color, texture, 1.0f);
+		}
+
 		for (auto& [id, entity] : m_ClientPlayerEntities)
 		{
 			glm::vec3 position = { entity->GetPosition().x, entity->GetPosition().y, -0.2f };
@@ -344,9 +402,9 @@ namespace esc {
 				playerEntityCreateInfo.IsDynamic = true;
 				playerEntityCreateInfo.FixedRotation = true;
 				playerEntityCreateInfo.AllowSleep = false;
-				playerEntityCreateInfo.Position = { data.LastTransformUpdate.PositionX, data.LastTransformUpdate.PositionY };
-				playerEntityCreateInfo.Scale = { data.LastTransformUpdate.ScaleX, data.LastTransformUpdate.ScaleY };
-				playerEntityCreateInfo.Color = { data.LastPlayerUpdate.ColorR, data.LastPlayerUpdate.ColorG, data.LastPlayerUpdate.ColorB, 1.0f };
+				playerEntityCreateInfo.Position = { data.LatestTransformUpdate.PositionX, data.LatestTransformUpdate.PositionY };
+				playerEntityCreateInfo.Scale = { data.LatestTransformUpdate.ScaleX, data.LatestTransformUpdate.ScaleY };
+				playerEntityCreateInfo.Color = { data.LatestPlayerUpdate.ColorR, data.LatestPlayerUpdate.ColorG, data.LatestPlayerUpdate.ColorB, 1.0f };
 				playerEntityCreateInfo.Friction = 0.0f;
 
 				if (playerEntityCreateInfo.Scale.x == 0.0f || playerEntityCreateInfo.Scale.y == 0.0f)
@@ -356,7 +414,7 @@ namespace esc {
 			}
 
 			Ref<Entity> entity = m_ClientPlayerEntities.at(id);
-			auto& materialData = data.LastPlayerUpdate;
+			auto& materialData = data.LatestPlayerUpdate;
 			entity->SetColor({ materialData.ColorR, materialData.ColorG, materialData.ColorB, 1.0f });
 
 			Ref<Texture> texture = entity->GetTexture();
@@ -400,7 +458,7 @@ namespace esc {
 
 		if (m_PlayerEntity->GetPosition().y < -35.0f)
 		{
-			m_PlayerEntity->SetPosition({ -2.0f, 10.0f });
+			m_PlayerEntity->SetPosition(m_PlayerSpawnPosition);
 			m_Camera.SetPosition(glm::lerp(m_Camera.GetPosition(), m_PlayerEntity->GetPosition(), cameraMoveSpeed * 10.0f));
 		}
 
@@ -420,7 +478,7 @@ namespace esc {
 				continue;
 
 			Ref<Entity> entity = m_ClientPlayerEntities[id];
-			auto& input = data.LastInputUpdate;
+			auto& input = data.LatestInputUpdate;
 			entity->SetLinearVelocity({ input.HorizontalAxis * input.Speed, entity->GetLinearVelocity().y });
 
 			if (entity->IsGrounded())
@@ -443,10 +501,14 @@ namespace esc {
 			packet.Speed = playerSpeed;
 			packet.Jump = EscapeGame::Get().GetKeyboard()->GetKey(KeyCode::Space) || EscapeGame::Get().GetGamepad()->GetButton(GamepadButtonCode::A);
 
-			if (packet != m_LastInputPacket || m_SendPackets)
+			if (packet != m_LatestInputPacket || m_SendPackets)
+			{
+				// std::cout << "Sending Input packet!" << std::endl;
 				EscapeGame::Get().GetClient()->SendPacket(PacketType::Input, packet);
+				m_SentPackets++;
+			}
 
-			m_LastInputPacket = packet;
+			m_LatestInputPacket = packet;
 		}
 
 		// Transform
@@ -458,10 +520,14 @@ namespace esc {
 			update.ScaleX = m_PlayerEntity->GetScale().x;
 			update.ScaleY = m_PlayerEntity->GetScale().y;
 
-			if (update != m_LastTransformUpdate || m_SendPackets)
+			if (update != m_LatestTransformUpdate || m_SendPackets)
+			{
+				// std::cout << "Sending TransformUpdate packet!" << std::endl;
 				EscapeGame::Get().GetClient()->SendPacket(PacketType::TransformUpdate, update);
+				m_SentPackets++;
+			}
 
-			m_LastTransformUpdate = update;
+			m_LatestTransformUpdate = update;
 		}
 
 		// Player Update (Material data)
@@ -473,26 +539,100 @@ namespace esc {
 			update.ColorG = m_PlayerEntity->GetColor().g;
 			update.ColorB = m_PlayerEntity->GetColor().b;
 
-			if (update != m_LastPlayerUpdate || m_SendPackets)
+			if (update != m_LatestPlayerUpdate || m_SendPackets)
 			{
-#if 0
-				std::cout << "Sending PlayerUpdate packet!" << std::endl;
-				std::cout << "  Texture Data: " << std::endl;
-				std::cout << "    Name: " << textureName << " / " << update.TextureName << std::endl;
-				std::cout << "    Filepath: " << m_PlayerEntity->GetTexture()->GetInfo().Filepath << std::endl;
-				std::cout << "    Has Data: " << (m_PlayerEntity->GetTexture()->GetInfo().Data ? "true" : "false") << std::endl;
-#endif
+				// std::cout << "Sending PlayerUpdate packet!" << std::endl;
+				// std::cout << "  Texture Data: " << std::endl;
+				// std::cout << "    Name: " << textureName << " / " << update.TextureName << std::endl;
+				// std::cout << "    Filepath: " << m_PlayerEntity->GetTexture()->GetInfo().Filepath << std::endl;
+				// std::cout << "    Has Data: " << (m_PlayerEntity->GetTexture()->GetInfo().Data ? "true" : "false") << std::endl;
 				EscapeGame::Get().GetClient()->SendPacket(PacketType::PlayerUpdate, update);
+				m_SentPackets++;
 			}
 
-			m_LastPlayerUpdate = update;
+			m_LatestPlayerUpdate = update;
 		}
-		
+
+		// Physics Data
+		{
+			PhysicsDataPacket data = {};
+
+			for (auto& entity : m_GlobalEntities)
+				data.NumPhysicsEntities++;
+
+			for (auto& [id, entity] : m_ClientPlayerEntities)
+				data.NumPhysicsEntities++;
+
+			if (data != m_LatestPhysicsData || m_SendPackets)
+			{
+				// std::cout << "Sending PhysicsData packet!" << std::endl;
+				EscapeGame::Get().GetClient()->SendPacket(PacketType::PhysicsData, data);
+				m_SentPackets++;
+			}
+
+			m_LatestPhysicsData = data;
+		}
+
+		// Entity Update
+		{
+#define PRINT_MOVING_ENTITIES 0
+
+#if PRINT_MOVING_ENTITIES
+			std::cout << "Moving entities: ";
+			uint32 entityPrintIndex = 0;
+#endif
+			for (size_t i = 0; i < m_GlobalEntities.size(); i++)
+			{
+				Ref<Entity> entity = m_GlobalEntities[i];
+
+				auto velocity = entity->GetLinearVelocity();
+				const float fct = 0.1f;
+				// TODO: optimize (contacts?)
+				if (velocity.x > fct || velocity.x < -fct || velocity.y > fct || velocity.y < -fct || m_SendPackets)
+				{
+#if PRINT_MOVING_ENTITIES
+					if (entityPrintIndex > 0)
+						std::cout << ", ";
+					std::cout << entity->GetDebugName();
+					entityPrintIndex++;
+#endif
+
+					EntityUpdatePacket update = {};
+					update.ID = i;
+					update.PositionX = entity->GetPosition().x;
+					update.PositionY = entity->GetPosition().y;
+					update.Angle = entity->GetAngle();
+					update.ScaleX = entity->GetScale().x;
+					update.ScaleY = entity->GetScale().y;
+					update.VelocityX = velocity.x;
+					update.VelocityY = velocity.y;
+
+					if (update != m_LatestEntityUpdateMap[i] || m_SendPackets)
+					{
+						// std::cout << "Sending EntityUpdate packet! (" << update.ID << ")" << std::endl;
+						// EscapeGame::Get().GetClient()->SendPacket(PacketType::EntityUpdate, update);
+						m_SentPackets++;
+					}
+
+					m_LatestEntityUpdateMap[i] = update;
+				}
+			}
+
+#if PRINT_MOVING_ENTITIES
+			std::cout << std::endl;
+#endif
+		}
+
 		if (m_SendPackets)
 		{
 			// TODO: Print something
 			m_SendPackets = false;
 		}
+		
+		// std::cout << "Sent packets: " << m_SendPackets << std::endl;
+
+		m_PacketsPerFrame = m_SentPackets;
+		m_SentPackets = 0;
 
 		for (auto& [id, data] : clientData)
 		{
@@ -500,7 +640,7 @@ namespace esc {
 			{
 				Ref<Entity> entity = m_ClientPlayerEntities.at(id);
 
-				auto& transform = data.LastTransformUpdate;
+				auto& transform = data.LatestTransformUpdate;
 				glm::vec2 position = { transform.PositionX, transform.PositionY };
 				float angle = transform.Angle;
 				glm::vec2 scale = { transform.ScaleX, transform.ScaleY };

@@ -189,6 +189,19 @@ namespace esc {
 		PacketHeader header;
 		memcpy(&header, data, sizeof(PacketHeader));
 
+#define BROADCAST_PACKET(packetType, data) \
+{ \
+	packetType packetData; \
+	memcpy(&packetData, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(packetType)); \
+	uint32 bufferSize = sizeof(PacketHeader) + sizeof(packetType); \
+	uint8* buffer = new uint8[bufferSize]; \
+	memcpy(buffer, &header, sizeof(PacketHeader)); \
+	memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &packetData, sizeof(packetType)); \
+	ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE); \
+	enet_host_broadcast(m_Server, 0, packet); \
+	delete[] buffer; \
+}
+
 		switch (header.Type)
 		{
 		case PacketType::Connect:
@@ -222,50 +235,27 @@ namespace esc {
 		}
 		case PacketType::Input:
 		{
-			InputPacket inputPacket;
-			memcpy(&inputPacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(InputPacket));
-
-			uint32 bufferSize = sizeof(PacketHeader) + sizeof(InputPacket);
-			uint8* buffer = new uint8[bufferSize];
-			memcpy(buffer, &header, sizeof(PacketHeader));
-			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &inputPacket, sizeof(InputPacket));
-
-			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
-			enet_host_broadcast(m_Server, 0, packet);
-
-			delete[] buffer;
+			BROADCAST_PACKET(InputPacket, data);
 			break;
 		}
 		case PacketType::TransformUpdate:
 		{
-			TransformUpdatePacket transformPacket;
-			memcpy(&transformPacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(TransformUpdatePacket));
-
-			uint32 bufferSize = sizeof(PacketHeader) + sizeof(TransformUpdatePacket);
-			uint8* buffer = new uint8[bufferSize];
-			memcpy(buffer, &header, sizeof(PacketHeader));
-			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &transformPacket, sizeof(TransformUpdatePacket));
-
-			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
-			enet_host_broadcast(m_Server, 0, packet);
-
-			delete[] buffer;
+			BROADCAST_PACKET(TransformUpdatePacket, data);
 			break;
 		}
 		case PacketType::PlayerUpdate:
 		{
-			PlayerUpdatePacket playerUpdatePacket;
-			memcpy(&playerUpdatePacket, static_cast<uint8*>(data + sizeof(PacketHeader)), sizeof(PlayerUpdatePacket));
-
-			uint32 bufferSize = sizeof(PacketHeader) + sizeof(PlayerUpdatePacket);
-			uint8* buffer = new uint8[bufferSize];
-			memcpy(buffer, &header, sizeof(PacketHeader));
-			memcpy(static_cast<uint8*>(buffer + sizeof(PacketHeader)), &playerUpdatePacket, sizeof(PlayerUpdatePacket));
-
-			ENetPacket* packet = enet_packet_create(buffer, bufferSize, ENET_PACKET_FLAG_RELIABLE);
-			enet_host_broadcast(m_Server, 0, packet);
-
-			delete[] buffer;
+			BROADCAST_PACKET(PlayerUpdatePacket, data);
+			break;
+		}
+		case PacketType::PhysicsData:
+		{
+			BROADCAST_PACKET(PhysicsDataPacket, data);
+			break;
+		}
+		case PacketType::EntityUpdate:
+		{
+			BROADCAST_PACKET(EntityUpdatePacket, data);
 			break;
 		}
 		}

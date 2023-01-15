@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GlobalConstants.h"
 #include "PrimitiveTypes.h"
 #include "RefCounting.h"
 

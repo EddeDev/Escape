@@ -66,6 +66,8 @@ namespace esc {
 
 		bool IsChunk() const { return m_IsChunk; }
 		const std::unordered_map<TileType, Ref<Texture>>& GetChunkTextures() const { return m_ChunkTextures; }
+
+		const char* GetDebugName() const { return m_DebugName; }
 	private:
 		b2Body* m_Body = nullptr;
 		b2Fixture* m_Fixture = nullptr;

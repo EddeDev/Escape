@@ -1,9 +1,6 @@
 #include "ClientPCH.h"
 #include "EscapeGame.h"
 
-#define ESCAPE_TEST_ADDRESS "127.0.0.1"
-#define ESCAPE_DEFAULT_PORT 42650
-
 namespace esc {
 
 	void Run()
@@ -12,16 +9,25 @@ namespace esc {
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
 #endif
 
+		std::cout << "IP Address: ";
+		std::string address;
+#if ESCAPE_ONLINE
+		std::cin >> address;
+#else
+		address = ESCAPE_TEST_ADDRESS;
+		std::cout << address << std::endl;
+#endif
+
 		std::cout << "Username: ";
 		std::string username;
-#if 1
+#if ESCAPE_ONLINE
 		std::cin >> username;
 #else
 		username = "EddeDev";
 		std::cout << username << std::endl;
 #endif
 
-		EscapeGame* instance = new EscapeGame(ESCAPE_TEST_ADDRESS, ESCAPE_DEFAULT_PORT, username);
+		EscapeGame* instance = new EscapeGame(address, ESCAPE_DEFAULT_PORT, username);
 		instance->Run();
 		delete instance;
 	}

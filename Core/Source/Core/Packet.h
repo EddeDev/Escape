@@ -13,7 +13,9 @@ namespace esc {
 		Input = 4,
 		LevelData = 5,
 		TransformUpdate = 6,
-		PlayerUpdate = 7
+		PlayerUpdate = 7,
+		PhysicsData = 8,
+		EntityUpdate = 9
 	};
 	
 	struct PacketHeader
@@ -97,6 +99,40 @@ namespace esc {
 				ColorR == other.ColorR && 
 				ColorG == other.ColorG && 
 				ColorB == other.ColorB;
+		}
+	};
+
+	struct PhysicsDataPacket
+	{
+		uint32 NumPhysicsEntities = 0;
+
+		bool operator==(const PhysicsDataPacket& other) const
+		{
+			return NumPhysicsEntities == other.NumPhysicsEntities;
+		}
+	};
+
+	struct EntityUpdatePacket
+	{
+		uint32 ID = 0;
+		float PositionX = 0.0f;
+		float PositionY = 0.0f;
+		float Angle = 0.0f;
+		float ScaleX = 0.0f;
+		float ScaleY = 0.0f;
+		float VelocityX = 0.0f;
+		float VelocityY = 0.0f;
+
+		bool operator==(const EntityUpdatePacket& other) const
+		{
+			return ID == other.ID && 
+				PositionX == other.PositionX &&
+				PositionY == other.PositionY &&
+				Angle == other.Angle &&
+				ScaleX == other.ScaleX &&
+				ScaleY == other.ScaleY &&
+				VelocityX == other.VelocityX &&
+				VelocityY == other.VelocityY;
 		}
 	};
 

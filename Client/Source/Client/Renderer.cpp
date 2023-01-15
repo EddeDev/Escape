@@ -74,7 +74,7 @@ namespace esc {
 	void Renderer::BeginScene(const Camera& camera)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.46f, 0.84f, 0.75f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		m_CameraData.ViewMatrix = camera.ViewMatrix;
 		m_CameraData.ProjectionMatrix = camera.ProjectionMatrix;
@@ -155,15 +155,30 @@ namespace esc {
 
 		for (uint32 i = 0; i < 4; i++)
 		{
+			if (m_UseCustomColors)
+				m_QuadVertexPointer->Color = m_CustomColors[i];
+			else
+				m_QuadVertexPointer->Color = color;
+
 			m_QuadVertexPointer->Position = transform * m_QuadVertexPositions[i];
-			m_QuadVertexPointer->Color = color;
 			m_QuadVertexPointer->TexCoord = m_QuadTextureCoords[i];
 			m_QuadVertexPointer->TexIndex = textureIndex;
 			m_QuadVertexPointer->TilingFactor = tilingFactor;
 			m_QuadVertexPointer++;
 		}
 
+		m_UseCustomColors = false;
 		m_QuadIndexCount += 6;
+	}
+
+	void Renderer::SetColors(const glm::vec4& c1, const glm::vec4& c2, const glm::vec4& c3, const glm::vec4& c4)
+	{
+		m_CustomColors[0] = c1;
+		m_CustomColors[1] = c2;
+		m_CustomColors[2] = c3;
+		m_CustomColors[3] = c4;
+
+		m_UseCustomColors = true;
 	}
 
 	void Renderer::SetViewportSize(int32 width, int32 height)

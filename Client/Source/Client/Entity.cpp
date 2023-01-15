@@ -30,7 +30,7 @@ namespace esc {
 			bodyDef.type = createInfo.IsDynamic ? b2_dynamicBody : b2_staticBody;
 		bodyDef.position.Set(createInfo.Position.x, createInfo.Position.y);
 		bodyDef.angle = createInfo.Angle;
-		bodyDef.userData.pointer = (uintptr_t)m_DebugName;
+		bodyDef.userData.pointer = (uintptr_t)this;
 		bodyDef.fixedRotation = createInfo.FixedRotation;
 		bodyDef.allowSleep = createInfo.AllowSleep;
 		m_Body = createInfo.World->CreateBody(&bodyDef);

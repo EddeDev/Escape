@@ -18,9 +18,10 @@ namespace esc {
 	{
 		int32 ID = -1;
 		std::string Username = "";
-		InputPacket LastInputUpdate;
-		TransformUpdatePacket LastTransformUpdate;
-		PlayerUpdatePacket LastPlayerUpdate;
+		InputPacket LatestInputUpdate;
+		TransformUpdatePacket LatestTransformUpdate;
+		PlayerUpdatePacket LatestPlayerUpdate;
+		PhysicsDataPacket LatestPhysicsData;
 	};
 
 	class Client : public ReferenceCounted
@@ -54,6 +55,7 @@ namespace esc {
 
 		void AddClientConnectCallback(const std::function<void(int32)>& callback) { m_ClientConnectCallbacks.push_back(callback); }
 		void AddClientDisconnectCallback(const std::function<void(int32)>& callback) { m_ClientDisconnectCallbacks.push_back(callback); }
+		void AddEntityUpdateCallback(const std::function<void(const EntityUpdatePacket&)>& callback) { m_EntityUpdateCallbacks.push_back(callback); }
 
 		std::map<int32, ClientData>& GetClientData() { return m_ClientData; }
 		const std::map<int32, ClientData>& GetClientData() const { return m_ClientData; }
@@ -69,6 +71,7 @@ namespace esc {
 		std::map<int32, ClientData> m_ClientData;
 		std::vector<std::function<void(int32)>> m_ClientConnectCallbacks;
 		std::vector<std::function<void(int32)>> m_ClientDisconnectCallbacks;
+		std::vector<std::function<void(const EntityUpdatePacket&)>> m_EntityUpdateCallbacks;
 	};
 
 }

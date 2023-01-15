@@ -2,6 +2,7 @@
 
 #include "Server.h"
 #include "Time.h"
+#include "Sync.h"
 
 #include <Windows.h>
 
@@ -12,10 +13,11 @@ namespace esc {
 		SetConsoleTitleW(L"Server");
 
 		Time::Init();
+		Sync::Init();
 
 		ServerCreateInfo serverCreateInfo;
-		serverCreateInfo.MaxPlayers = 20;
-		serverCreateInfo.Port = 42650;
+		serverCreateInfo.MaxPlayers = ESCAPE_MAX_PLAYERS;
+		serverCreateInfo.Port = ESCAPE_DEFAULT_PORT;
 
 		Server* server = new Server(serverCreateInfo);
 
@@ -33,13 +35,18 @@ namespace esc {
 				frames = 0;
 			}
 
-			server->Update();
-
+#if 0
+			Sync::Tick(static_cast<int32>(1.0f / ESCAPE_FIXED_TIMESTEP));
+#else
 			using namespace std::chrono_literals;
 			std::this_thread::sleep_for(5ms);
+#endif
+			server->Update();
 		}
 
 		delete server;
+
+		Sync::Shutdown();
 	}
 
 }

@@ -9,23 +9,35 @@ namespace esc {
 	class Time
 	{
 	private:
-		inline static uint64 s_Frequency = 0;
-		inline static uint64 s_Offset = 0;
+		inline static int64 s_Frequency = 0;
+		inline static int64 s_Offset = 0;
 	public:
 		static void Init()
 		{
 			QueryPerformanceFrequency((LARGE_INTEGER*)&s_Frequency);
 
-			uint64 timerValue = 0;
+			int64 timerValue = 0;
 			QueryPerformanceCounter((LARGE_INTEGER*)&timerValue);
 			s_Offset = timerValue;
 		}
 
 		static float Get()
 		{
-			uint64 timerValue = 0;
+			int64 timerValue = 0;
 			QueryPerformanceCounter((LARGE_INTEGER*)&timerValue);
-			return (float)(timerValue - s_Offset) / s_Frequency;
+			return static_cast<float>(timerValue - s_Offset) / s_Frequency;
+		}
+
+		static int64 GetSysTime()
+		{
+			int64 timerValue = 0;
+			QueryPerformanceCounter((LARGE_INTEGER*)&timerValue);
+			return timerValue;
+		}
+
+		static int64 GetFrequency()
+		{
+			return s_Frequency;
 		}
 	};
 
