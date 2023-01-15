@@ -25,6 +25,7 @@ namespace esc {
 	static constexpr uint64 s_HeaderIdentifier = 0x9b4651a2;
 
 	static const char* s_ResourcePackFilepath = "Resources.esc";
+	static const char* s_TextureFileExtension = ".tga";
 
 	struct ResourcePackHeader
 	{
@@ -130,6 +131,7 @@ namespace esc {
 			info.Height = textureDataHeaders[i].Height;
 			info.Channels = textureDataHeaders[i].Channels;
 			info.Data = textureDataStorage[i].data();
+			info.Filepath = "Resources/Textures/" + textureName + s_TextureFileExtension;
 
 			textureInfos[textureName] = info;
 		}
@@ -174,7 +176,7 @@ namespace esc {
 					}
 				}
 			}
-			else if (path.extension() == ".tga")
+			else if (path.extension() == s_TextureFileExtension)
 			{
 				std::string textureName = path.filename().stem().string();
 

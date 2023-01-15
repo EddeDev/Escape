@@ -474,7 +474,16 @@ namespace esc {
 			update.ColorB = m_PlayerEntity->GetColor().b;
 
 			if (update != m_LastPlayerUpdate || m_SendPackets)
+			{
+#if 0
+				std::cout << "Sending PlayerUpdate packet!" << std::endl;
+				std::cout << "  Texture Data: " << std::endl;
+				std::cout << "    Name: " << textureName << " / " << update.TextureName << std::endl;
+				std::cout << "    Filepath: " << m_PlayerEntity->GetTexture()->GetInfo().Filepath << std::endl;
+				std::cout << "    Has Data: " << (m_PlayerEntity->GetTexture()->GetInfo().Data ? "true" : "false") << std::endl;
+#endif
 				EscapeGame::Get().GetClient()->SendPacket(PacketType::PlayerUpdate, update);
+			}
 
 			m_LastPlayerUpdate = update;
 		}
